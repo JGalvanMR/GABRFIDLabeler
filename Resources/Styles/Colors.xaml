@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- 🎨 Apple Developer Inspired Color Palette -->
+
+    <!-- Blues -->
+    <Color x:Key="RoyalBlue">#0066CC</Color>
+    <Color x:Key="DodgerBlue">#0071E3</Color>
+
+    <!-- Neutrals / Darks -->
+    <Color x:Key="MidnightBlue">#111111</Color>
+    <Color x:Key="DarkSlateGray">#1D1D1F</Color>
+    <Color x:Key="DarkSlateGrayAlt">#424245</Color>
+
+    <!-- Grays -->
+    <Color x:Key="Gray">#86868B</Color>
+    <Color x:Key="LightGray">#D2D2D7</Color>
+
+    <!-- Whites & Neutrals -->
+    <Color x:Key="Lavender">#D5E8F3</Color>
+    <Color x:Key="LavenderAlt">#E8E8ED</Color>
+    <Color x:Key="Gainsboro">#E3E3E3</Color>
+    <Color x:Key="WhiteSmoke">#F0F0F0</Color>
+    <Color x:Key="WhiteSmokeAlt">#F5F5F7</Color>
+    <Color x:Key="Snow">#FAFAFA</Color>
+    <Color x:Key="GhostWhite">#FAFAFC</Color>
+
+    <!-- Semantic / Functional Colors -->
+    <Color x:Key="PrimaryColor">#0071E3</Color>
+    <Color x:Key="SecondaryColor">#0066CC</Color>
+    <Color x:Key="AccentColor">#D5E8F3</Color>
+
+    <!-- Background Layers -->
+    <Color x:Key="SurfaceLight">#F5F5F7</Color>
+    <Color x:Key="SurfaceDark">#1D1D1F</Color>
+
+    <Color x:Key="BackgroundLight">#FAFAFA</Color>
+    <Color x:Key="BackgroundDark">#111111</Color>
+
+    <!-- Shadows -->
+    <Color x:Key="ShadowLight">#33000000</Color>
+    <Color x:Key="ShadowDark">#80000000</Color>
+
+</ResourceDictionary>

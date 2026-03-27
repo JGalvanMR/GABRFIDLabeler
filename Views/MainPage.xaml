@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:ZebraRFIDApp.ViewModels"
+             x:Class="ZebraRFIDApp.Views.MainPage"
+             Title="Impresión RFID"
+             x:DataType="{x:Type viewmodels:PrinterViewModel}">
+    <ScrollView>
+        <VerticalStackLayout Padding="25" Spacing="20">
+            <!--  Título  -->
+            <Label Text="Impresión de Etiquetas RFID"
+                   FontSize="24"
+                   HorizontalOptions="Center"
+                   FontAttributes="Bold" />
+
+            <!--  Selector de modo  -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
+                <RadioButton Content="Parámetros de Impresión"
+                             GroupName="Modo"
+                             IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=Impresion, Mode=TwoWay}" />
+                <RadioButton Content="Reimpresión"
+                             GroupName="Modo"
+                             IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=Reimpresion, Mode=TwoWay}" />
+                <RadioButton Content="NUEVA ETIQUETA"
+                             GroupName="Modo"
+                             IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=NuevaEtiqueta, Mode=TwoWay}" />
+            </HorizontalStackLayout>
+
+            <!--  Conexión  -->
+            <Frame Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Configuración de Impresora" />
+                    <Entry Placeholder="IP de la impresora"
+                           Text="{Binding PrinterIp}"
+                           Keyboard="Url" />
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Text="Conectar"
+                            Command="{Binding ConnectCommand}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!--  Parámetros de impresión  -->
+            <Frame Style="{StaticResource CardStyle}" IsVisible="{Binding IsImpresionVisible}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Parámetros de Impresión" />
+                    <Entry Placeholder="Fecha de compra (Ej. MAR-2025)"
+                           Text="{Binding Date}"
+                           TextTransform="Uppercase" />
+                    <Entry Placeholder="Número de la última etiqueta impresa"
+                           Text="{Binding LabelPrint}"
+                           Keyboard="Numeric" />
+                    <Entry Placeholder="Cantidad de etiquetas a imprimir"
+                           Text="{Binding LabelsToPrint}"
+                           Keyboard="Numeric" />
+                    <!--  Acciones  -->
+                    <Button Padding="10,5"
+                            Style="{StaticResource PrimaryButton}"
+                            Text="Imprimir lote de etiquetas"
+                            Command="{Binding PrintBatchCommand}"
+                            BackgroundColor="#007ACC"
+                            TextColor="White"
+                            CornerRadius="8" />
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Text="Impresión simple"
+                            Command="{Binding PrintSingleCommand}"
+                            IsVisible="False"
+                            IsEnabled="False" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!--  Reimpresión de etiquetas  -->
+            <Frame Style="{StaticResource CardStyle}" IsVisible="{Binding IsReimpresionVisible}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Reimpresión de Etiquetas" />
+                    <Entry x:Name="EpcEntry"
+                           Placeholder="EPC o número de etiqueta a reimprimir"
+                           Text="{Binding EpcToReprint}"
+                           ReturnCommand="{Binding ReprintCommand}"
+                           TextColor="{AppThemeBinding Light={StaticResource DarkSlateGray},
+                                                       Dark={StaticResource WhiteSmoke}}"
+                           PlaceholderColor="{AppThemeBinding Light={StaticResource DarkSlateGrayAlt},
+                                                              Dark={StaticResource WhiteSmokeAlt}}"
+                           BackgroundColor="Transparent" />
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Text="Reimprimir etiqueta"
+                            Command="{Binding ReprintCommand}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!--  NUEVAS ETIQUETAS  -->
+            <Frame Style="{StaticResource CardStyle}" IsVisible="{Binding IsNuevaEtiquetaVisible}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Nuevas Etiquetas" />
+                    <Entry x:Name="EpcEntryNEW"
+                           Placeholder="EPC o número de etiqueta a reimprimir"
+                           Text="{Binding EpcToReprintN}"
+                           ReturnCommand="{Binding ReprintNCommand}"
+                           ReturnType="Send"
+                           TextColor="{AppThemeBinding Light={StaticResource DarkSlateGray},
+                                                       Dark={StaticResource WhiteSmoke}}"
+                           PlaceholderColor="{AppThemeBinding Light={StaticResource DarkSlateGrayAlt},
+                                                              Dark={StaticResource WhiteSmokeAlt}}"
+                           BackgroundColor="Transparent" />
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Text="Reimprimir etiqueta"
+                            Command="{Binding ReprintNCommand}" />
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
