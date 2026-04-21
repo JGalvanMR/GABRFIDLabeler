@@ -1,8 +1,6 @@
-﻿<maui:MauiWinUIApplication
-    x:Class="ZebraRFIDApp.WinUI.App"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:maui="using:Microsoft.Maui"
-    xmlns:local="using:ZebraRFIDApp.WinUI">
+<maui:MauiWinUIApplication xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:maui="using:Microsoft.Maui"
+                           xmlns:local="using:GABRFIDLabeler.WinUI"
+                           x:Class="GABRFIDLabeler.WinUI.App" />
 
-</maui:MauiWinUIApplication>

@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Globalization;
@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using Zebra.Sdk.Comm;
 using Zebra.Sdk.Printer;
 
-namespace ZebraRFIDApp.Models;
+namespace GABRFIDLabeler.Models;
 
 public class ZebraPrinterService
 {

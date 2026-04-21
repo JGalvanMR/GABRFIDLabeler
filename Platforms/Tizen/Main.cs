@@ -2,7 +2,7 @@ using System;
 using Microsoft.Maui;
 using Microsoft.Maui.Hosting;
 
-namespace ZebraRFIDApp
+namespace GABRFIDLabeler
 {
     internal class Program : MauiApplication
     {
@@ -15,3 +15,4 @@ namespace ZebraRFIDApp
         }
     }
 }
+

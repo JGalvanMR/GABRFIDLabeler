@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 
-namespace ZebraRFIDApp;
+namespace GABRFIDLabeler;
 
 public static class MauiProgram
 {
@@ -24,4 +24,5 @@ public static class MauiProgram
         return builder.Build();
     }
 }
+
 

@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewmodels="clr-namespace:ZebraRFIDApp.ViewModels"
-             x:Class="ZebraRFIDApp.Views.MainPage"
+             xmlns:viewmodels="clr-namespace:GABRFIDLabeler.ViewModels"
+             xmlns:converters="clr-namespace:GABRFIDLabeler.Converters"
+             x:Class="GABRFIDLabeler.Views.MainPage"
              Title="Impresión RFID"
              x:DataType="{x:Type viewmodels:PrinterViewModel}">
 
     <ContentPage.BackgroundColor>
         <AppThemeBinding Light="#F5F7FA" Dark="#1E1E2E" />
     </ContentPage.BackgroundColor>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:RadioButtonValueToCheckedConverter x:Key="RadioConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="24">
@@ -72,7 +79,8 @@
                                          FontSize="14"
                                          HorizontalOptions="Center"
                                          VerticalOptions="Center"
-                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=Impresion, Mode=TwoWay}">
+                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=Parameters, Mode=Default}"
+                                         Value="Parameters">
                                 <RadioButton.TextColor>
                                     <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
                                 </RadioButton.TextColor>
@@ -92,7 +100,7 @@
                                          FontSize="14"
                                          HorizontalOptions="Center"
                                          VerticalOptions="Center"
-                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=Reimpresion, Mode=TwoWay}">
+                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=Reimpresion, Mode=Default}">
                                 <RadioButton.TextColor>
                                     <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
                                 </RadioButton.TextColor>
@@ -112,7 +120,7 @@
                                          FontSize="14"
                                          HorizontalOptions="Center"
                                          VerticalOptions="Center"
-                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=NuevaEtiqueta, Mode=TwoWay}">
+                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=NuevaEtiqueta, Mode=Default}">
                                 <RadioButton.TextColor>
                                     <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
                                 </RadioButton.TextColor>
@@ -616,3 +624,4 @@
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
+

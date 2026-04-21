@@ -1,6 +1,6 @@
-using ZebraRFIDApp.ViewModels;
+using GABRFIDLabeler.ViewModels;
 
-namespace ZebraRFIDApp.Views;
+namespace GABRFIDLabeler.Views;
 
 public partial class MainPage : ContentPage
 {

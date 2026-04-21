@@ -1,4 +1,4 @@
-﻿namespace ZebraRFIDApp;
+namespace GABRFIDLabeler;
 
 public partial class AppShell : Shell
 {

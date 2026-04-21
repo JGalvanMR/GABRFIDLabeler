@@ -1,7 +1,7 @@
-﻿using Android.App;
+using Android.App;
 using Android.Runtime;
 
-namespace ZebraRFIDApp
+namespace GABRFIDLabeler
 {
     [Application]
     public class MainApplication : MauiApplication
@@ -14,3 +14,4 @@ namespace ZebraRFIDApp
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
     }
 }
+

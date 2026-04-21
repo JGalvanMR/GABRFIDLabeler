@@ -1,7 +1,7 @@
-﻿using ObjCRuntime;
+using ObjCRuntime;
 using UIKit;
 
-namespace ZebraRFIDApp
+namespace GABRFIDLabeler
 {
     public class Program
     {
@@ -14,3 +14,4 @@ namespace ZebraRFIDApp
         }
     }
 }
+

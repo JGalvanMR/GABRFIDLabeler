@@ -1,6 +1,6 @@
-﻿using Foundation;
+using Foundation;
 
-namespace ZebraRFIDApp
+namespace GABRFIDLabeler
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate
@@ -8,3 +8,4 @@ namespace ZebraRFIDApp
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
     }
 }
+

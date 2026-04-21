@@ -1,6 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ZebraRFIDApp.Models
+namespace GABRFIDLabeler.Models
 {
     // El modificador 'partial' es vital para que CommunityToolkit genere el código de soporte
     public partial class EtiquetaSugerida : ObservableObject

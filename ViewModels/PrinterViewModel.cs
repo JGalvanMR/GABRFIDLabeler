@@ -1,15 +1,15 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Zebra.Sdk.Comm;
-using ZebraRFIDApp.Models;
+using GABRFIDLabeler.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections.ObjectModel;
 
-namespace ZebraRFIDApp.ViewModels;
+namespace GABRFIDLabeler.ViewModels;
 
 public class PrinterViewModel : INotifyPropertyChanged
 {

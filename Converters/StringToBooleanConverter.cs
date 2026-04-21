@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Globalization;
 using Microsoft.Maui.Controls;
 
-namespace ZebraRFIDApp.Converters
+namespace GABRFIDLabeler.Converters
 {
     public class StringToBooleanConverter : IValueConverter
     {
@@ -25,3 +25,4 @@ namespace ZebraRFIDApp.Converters
         }
     }
 }
+

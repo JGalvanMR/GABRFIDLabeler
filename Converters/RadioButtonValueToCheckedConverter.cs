@@ -1,28 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 using System.Globalization;
+using Microsoft.Maui.Controls;
 
-namespace ZebraRFIDApp.Converters
+namespace GABRFIDLabeler.Converters
 {
     public class RadioButtonValueToCheckedConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            // Devuelve true si el valor actual coincide con el parámetro (modo seleccionado)
-            return value?.ToString() == parameter?.ToString();
+            if (value == null || parameter == null)
+                return false;
+
+            // Comparamos el valor del ViewModel con el parámetro del RadioButton
+            return value.ToString() == parameter.ToString();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            // Si el RadioButton está marcado, devolvemos el parámetro (el modo seleccionado)
+            // Si el RadioButton se marca (value es true), devolvemos el parámetro al ViewModel
             if (value is bool isChecked && isChecked)
                 return parameter?.ToString();
 
-            // Si no está marcado, devolvemos Binding.DoNothing en vez de null
-            return Binding.DoNothing;
+            return string.Empty;
         }
     }
 }
+
