@@ -1,85 +1,138 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    <!--  ============================================  -->
+    <!--  🌈 GRADIENTS  -->
+    <!--  ============================================  -->
 
-    <!-- 🌈 Global Gradients -->
-    <LinearGradientBrush x:Key="AppGradientLight" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{StaticResource WhiteSmokeAlt}" Offset="0.0" />
-        <GradientStop Color="{StaticResource Gainsboro}" Offset="1.0" />
+    <LinearGradientBrush x:Key="BackgroundGradientLight" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0.0" Color="{x:StaticResource LightBackground}" />
+        <GradientStop Offset="1.0" Color="{x:StaticResource LightSurfaceSecondary}" />
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="AppGradientDark" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{StaticResource DarkSlateGray}" Offset="0.0" />
-        <GradientStop Color="{StaticResource DarkSlateGrayAlt}" Offset="1.0" />
+    <LinearGradientBrush x:Key="BackgroundGradientDark" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0.0" Color="{x:StaticResource DarkBackground}" />
+        <GradientStop Offset="1.0" Color="{x:StaticResource DarkSurface}" />
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,1" EndPoint="1,0">
-        <GradientStop Color="{StaticResource DodgerBlue}" Offset="0.0" />
-        <GradientStop Color="{StaticResource RoyalBlue}" Offset="1.0" />
+    <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0.0" Color="{x:StaticResource PrimaryBlueLight}" />
+        <GradientStop Offset="1.0" Color="{x:StaticResource PrimaryBlue}" />
     </LinearGradientBrush>
 
-    <!-- 💎 Backgrounds -->
+    <LinearGradientBrush x:Key="SuccessGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0.0" Color="{x:StaticResource SuccessGreenDark}" />
+        <GradientStop Offset="1.0" Color="{x:StaticResource SuccessGreen}" />
+    </LinearGradientBrush>
+
+    <!--  ============================================  -->
+    <!--  📐 SHAPE DEFINITIONS  -->
+    <!--  ============================================  -->
+
+    <CornerRadius x:Key="CornerRadiusSmall">8</CornerRadius>
+    <CornerRadius x:Key="CornerRadiusMedium">12</CornerRadius>
+    <CornerRadius x:Key="CornerRadiusLarge">16</CornerRadius>
+    <CornerRadius x:Key="CornerRadiusXLarge">24</CornerRadius>
+
+    <!--  ============================================  -->
+    <!--  📏 SPACING  -->
+    <!--  ============================================  -->
+
+    <Thickness x:Key="SpacingXS">4</Thickness>
+    <Thickness x:Key="SpacingS">8</Thickness>
+    <Thickness x:Key="SpacingM">12</Thickness>
+    <Thickness x:Key="SpacingL">16</Thickness>
+    <Thickness x:Key="SpacingXL">20</Thickness>
+    <Thickness x:Key="SpacingXXL">24</Thickness>
+
+    <!--  ============================================  -->
+    <!--  📝 BASE STYLES  -->
+    <!--  ============================================  -->
+
+    <!--  Page Background  -->
     <Style TargetType="Page" ApplyToDerivedTypes="True">
-        <Setter Property="Padding" Value="16"/>
         <Setter Property="Background">
             <Setter.Value>
-                <AppThemeBinding 
-                    Light="{StaticResource AppGradientLight}"
-                    Dark="{StaticResource AppGradientDark}" />
+                <AppThemeBinding Light="{StaticResource BackgroundGradientLight}" Dark="{StaticResource BackgroundGradientDark}" />
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- 🧭 Navigation / Shell -->
+    <!--  Shell / Navigation  -->
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
-        <Setter Property="Shell.BackgroundColor"
-                Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
-        <Setter Property="Shell.ForegroundColor"
-                Value="{AppThemeBinding Light={StaticResource DarkSlateGray}, Dark={StaticResource WhiteSmokeAlt}}" />
-        <Setter Property="Shell.TitleColor"
-                Value="{AppThemeBinding Light={StaticResource RoyalBlue}, Dark={StaticResource Lavender}}" />
+        <Setter Property="Shell.BackgroundColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightSurface}" Dark="{StaticResource DarkSurface}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Shell.ForegroundColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextPrimary}" Dark="{StaticResource DarkTextPrimary}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Shell.TitleColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource PrimaryBlue}" Dark="{StaticResource PrimaryBlueLight}" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <!-- 🪩 Card Style -->
+    <!--  ============================================  -->
+    <!--  🃏 CARD STYLES  -->
+    <!--  ============================================  -->
+
     <Style x:Key="CardStyle" TargetType="Frame">
-        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusXLarge}" />
         <Setter Property="Padding" Value="20" />
         <Setter Property="HasShadow" Value="True" />
         <Setter Property="Background">
             <Setter.Value>
-                <AppThemeBinding 
-                    Light="{StaticResource AppGradientLight}"
-                    Dark="{StaticResource AppGradientDark}" />
+                <AppThemeBinding Light="{StaticResource LightSurface}" Dark="{StaticResource DarkSurface}" />
             </Setter.Value>
         </Setter>
         <Setter Property="Shadow">
             <Setter.Value>
-                <Shadow Brush="{AppThemeBinding Light={StaticResource ShadowLight}, Dark={StaticResource ShadowDark}}"
-                        Offset="8,8"
-                        Radius="18"
-                        Opacity="0.25" />
+                <Shadow Brush="{x:StaticResource ShadowDark}"
+                        Radius="12"
+                        Opacity="0.12"
+                        Offset="0,4" />
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- 🔘 Primary Button -->
-    <Style TargetType="Button" x:Key="PrimaryButton">
-        <Setter Property="FontSize" Value="16"/>
-        <Setter Property="CornerRadius" Value="12"/>
-        <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource WhiteSmokeAlt}, Dark={StaticResource WhiteSmoke}}" />
+    <Style x:Key="CardStyleSubtle" TargetType="Frame">
+        <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusMedium}" />
+        <Setter Property="Padding" Value="14,12" />
+        <Setter Property="HasShadow" Value="False" />
         <Setter Property="Background">
             <Setter.Value>
-                <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
-                    <GradientStop Color="{StaticResource DodgerBlue}" Offset="0.0" />
-                    <GradientStop Color="{StaticResource RoyalBlue}" Offset="1.0" />
-                </LinearGradientBrush>
+                <AppThemeBinding Light="{StaticResource LightSurfaceSecondary}" Dark="{StaticResource DarkSurfaceSecondary}" />
             </Setter.Value>
         </Setter>
+        <Setter Property="BorderColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightBorder}" Dark="{StaticResource DarkBorder}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ============================================  -->
+    <!--  🔘 BUTTON STYLES  -->
+    <!--  ============================================  -->
+
+    <!--  Primary Button  -->
+    <Style x:Key="PrimaryButton" TargetType="Button">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusMedium}" />
+        <Setter Property="TextColor" Value="#FFFFFF" />
+        <Setter Property="Background" Value="{StaticResource PrimaryGradient}" />
         <Setter Property="Shadow">
             <Setter.Value>
-                <Shadow Brush="{AppThemeBinding Light={StaticResource ShadowLight}, Dark={StaticResource ShadowDark}}"
-                        Offset="5,5" Radius="10" Opacity="0.35"/>
+                <Shadow Brush="{x:StaticResource PrimaryBlue}"
+                        Radius="8"
+                        Opacity="0.3"
+                        Offset="0,4" />
             </Setter.Value>
         </Setter>
         <Setter Property="VisualStateManager.VisualStateGroups">
@@ -89,7 +142,12 @@
                     <VisualState x:Name="Pressed">
                         <VisualState.Setters>
                             <Setter Property="Scale" Value="0.97" />
-                            <Setter Property="Shadow.Opacity" Value="0.15" />
+                            <Setter Property="Opacity" Value="0.9" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="Opacity" Value="0.5" />
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -97,21 +155,169 @@
         </Setter>
     </Style>
 
-    <!-- 🧾 Label -->
+    <!--  Secondary Button  -->
+    <Style x:Key="SecondaryButton" TargetType="Button">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusMedium}" />
+        <Setter Property="TextColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextPrimary}" Dark="{StaticResource DarkTextPrimary}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Background">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightSurfaceSecondary}" Dark="{StaticResource DarkSurfaceSecondary}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BorderColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightBorder}" Dark="{StaticResource DarkBorder}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BorderWidth" Value="1" />
+    </Style>
+
+    <!--  Success Button  -->
+    <Style x:Key="SuccessButton" TargetType="Button">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusMedium}" />
+        <Setter Property="TextColor" Value="#FFFFFF" />
+        <Setter Property="Background" Value="{StaticResource SuccessGradient}" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="{x:StaticResource SuccessGreen}"
+                        Radius="8"
+                        Opacity="0.3"
+                        Offset="0,4" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Small Button  -->
+    <Style x:Key="SmallButton" TargetType="Button">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="HeightRequest" Value="36" />
+        <Setter Property="CornerRadius" Value="{StaticResource CornerRadiusSmall}" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="TextColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextPrimary}" Dark="{StaticResource DarkTextPrimary}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Background">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource Gray100}" Dark="{StaticResource DarkBorderLight}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ============================================  -->
+    <!--  📝 ENTRY/INPUT STYLES  -->
+    <!--  ============================================  -->
+
+    <Style x:Key="InputStyle" TargetType="Entry">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextPrimary}" Dark="{StaticResource DarkTextPrimary}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="PlaceholderColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextTertiary}" Dark="{StaticResource DarkTextTertiary}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ============================================  -->
+    <!--  🏷️ LABEL STYLES  -->
+    <!--  ============================================  -->
+
     <Style TargetType="Label">
-        <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource DarkSlateGray},
-                                          Dark={StaticResource WhiteSmokeAlt}}" />
-        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="TextColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextPrimary}" Dark="{StaticResource DarkTextPrimary}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
     </Style>
 
-    <!-- 🧱 Borders -->
+    <Style x:Key="TitleLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextPrimary}" Dark="{StaticResource DarkTextPrimary}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SectionLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextPrimary}" Dark="{StaticResource DarkTextPrimary}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="CaptionLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextSecondary}" Dark="{StaticResource DarkTextSecondary}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="PlaceholderLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontAttributes" Value="Italic" />
+        <Setter Property="TextColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextTertiary}" Dark="{StaticResource DarkTextTertiary}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ============================================  -->
+    <!--  🔘 RADIO BUTTON STYLES  -->
+    <!--  ============================================  -->
+
+    <Style x:Key="TabRadioButton" TargetType="RadioButton">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="Margin" Value="4" />
+        <Setter Property="TextColor">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightTextPrimary}" Dark="{StaticResource DarkTextPrimary}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  ============================================  -->
+    <!--  🧱 BORDER STYLES  -->
+    <!--  ============================================  -->
+
     <Style TargetType="Border">
-        <Setter Property="StrokeShape" Value="RoundRectangle 12"/>
-        <Setter Property="Stroke" Value="Transparent"/>
-        <Setter Property="StrokeThickness" Value="0"/>
-        <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource CornerRadiusMedium}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Background">
+            <Setter.Value>
+                <AppThemeBinding Light="{StaticResource LightSurface}" Dark="{StaticResource DarkSurface}" />
+            </Setter.Value>
+        </Setter>
     </Style>
-
 </ResourceDictionary>

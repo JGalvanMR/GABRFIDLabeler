@@ -1,45 +1,55 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- 🎨 Apple Developer Inspired Color Palette -->
+    <!--  ============================================  -->
+    <!--  🎨 SYSTEM COLORS - Light & Dark Themes  -->
+    <!--  ============================================  -->
 
-    <!-- Blues -->
-    <Color x:Key="RoyalBlue">#0066CC</Color>
-    <Color x:Key="DodgerBlue">#0071E3</Color>
+    <!--  Primary Brand Colors  -->
+    <Color x:Key="PrimaryBlue">#0066CC</Color>
+    <Color x:Key="PrimaryBlueLight">#0071E3</Color>
 
-    <!-- Neutrals / Darks -->
-    <Color x:Key="MidnightBlue">#111111</Color>
-    <Color x:Key="DarkSlateGray">#1D1D1F</Color>
-    <Color x:Key="DarkSlateGrayAlt">#424245</Color>
+    <!--  Semantic Colors - Success/Warning/Error  -->
+    <Color x:Key="SuccessGreen">#34C759</Color>
+    <Color x:Key="SuccessGreenDark">#30D158</Color>
+    <Color x:Key="WarningOrange">#FF9500</Color>
+    <Color x:Key="WarningOrangeDark">#FF9F0A</Color>
+    <Color x:Key="ErrorRed">#FF3B30</Color>
+    <Color x:Key="ErrorRedDark">#FF453A</Color>
 
-    <!-- Grays -->
-    <Color x:Key="Gray">#86868B</Color>
-    <Color x:Key="LightGray">#D2D2D7</Color>
+    <!--  Light Theme Colors  -->
+    <Color x:Key="LightBackground">#F5F5F7</Color>
+    <Color x:Key="LightSurface">#FFFFFF</Color>
+    <Color x:Key="LightSurfaceSecondary">#F8F9FB</Color>
+    <Color x:Key="LightBorder">#E0E4EA</Color>
+    <Color x:Key="LightBorderLight">#E8ECF0</Color>
+    <Color x:Key="LightTextPrimary">#1A1A2E</Color>
+    <Color x:Key="LightTextSecondary">#6B7280</Color>
+    <Color x:Key="LightTextTertiary">#9CA3AF</Color>
 
-    <!-- Whites & Neutrals -->
-    <Color x:Key="Lavender">#D5E8F3</Color>
-    <Color x:Key="LavenderAlt">#E8E8ED</Color>
-    <Color x:Key="Gainsboro">#E3E3E3</Color>
-    <Color x:Key="WhiteSmoke">#F0F0F0</Color>
-    <Color x:Key="WhiteSmokeAlt">#F5F5F7</Color>
-    <Color x:Key="Snow">#FAFAFA</Color>
-    <Color x:Key="GhostWhite">#FAFAFC</Color>
+    <!--  Dark Theme Colors  -->
+    <Color x:Key="DarkBackground">#1D1D1F</Color>
+    <Color x:Key="DarkSurface">#2D2D44</Color>
+    <Color x:Key="DarkSurfaceSecondary">#252538</Color>
+    <Color x:Key="DarkBorder">#3A3A50</Color>
+    <Color x:Key="DarkBorderLight">#3D3D5C</Color>
+    <Color x:Key="DarkTextPrimary">#FFFFFF</Color>
+    <Color x:Key="DarkTextSecondary">#B0B0B0</Color>
+    <Color x:Key="DarkTextTertiary">#7A7A90</Color>
 
-    <!-- Semantic / Functional Colors -->
-    <Color x:Key="PrimaryColor">#0071E3</Color>
-    <Color x:Key="SecondaryColor">#0066CC</Color>
-    <Color x:Key="AccentColor">#D5E8F3</Color>
+    <!--  Neutral Colors  -->
+    <Color x:Key="Gray100">#F3F4F6</Color>
+    <Color x:Key="Gray200">#E5E7EB</Color>
+    <Color x:Key="Gray300">#D1D5DB</Color>
+    <Color x:Key="Gray400">#9CA3AF</Color>
+    <Color x:Key="Gray500">#6B7280</Color>
+    <Color x:Key="Gray600">#4B5563</Color>
+    <Color x:Key="Gray700">#374151</Color>
 
-    <!-- Background Layers -->
-    <Color x:Key="SurfaceLight">#F5F5F7</Color>
-    <Color x:Key="SurfaceDark">#1D1D1F</Color>
+    <!--  Shadow Colors  -->
+    <Color x:Key="ShadowLight">#1A000000</Color>
+    <Color x:Key="ShadowDark">#4D000000</Color>
 
-    <Color x:Key="BackgroundLight">#FAFAFA</Color>
-    <Color x:Key="BackgroundDark">#111111</Color>
 
-    <!-- Shadows -->
-    <Color x:Key="ShadowLight">#33000000</Color>
-    <Color x:Key="ShadowDark">#80000000</Color>
 
 </ResourceDictionary>

@@ -26,5 +26,8 @@ public partial class MainPage : ContentPage
             EpcEntryNEW.CursorPosition = 0;
             EpcEntryNEW.SelectionLength = EpcEntryNEW.Text?.Length ?? 0;
         };
+
+
     }
+
 }

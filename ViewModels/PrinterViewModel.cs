@@ -1,11 +1,13 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.Data.SqlClient;
+using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Zebra.Sdk.Comm;
 using ZebraRFIDApp.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using Microsoft.Data.SqlClient;
+using System.Collections.ObjectModel;
 
 namespace ZebraRFIDApp.ViewModels;
 
@@ -42,6 +44,12 @@ public class PrinterViewModel : INotifyPropertyChanged
                 OnPropertyChanged(nameof(IsImpresionVisible));
                 OnPropertyChanged(nameof(IsReimpresionVisible));
                 OnPropertyChanged(nameof(IsNuevaEtiquetaVisible));
+
+                // Si el usuario entra a Reimpresión, cargamos sugerencias automáticamente
+                if (value == "Reimpresion")
+                {
+                    _ = CargarSugerenciasAsync(); // El '_' indica que es una tarea disparada sin esperar (Fire and forget)
+                }
             }
         }
     }
@@ -238,7 +246,13 @@ public class PrinterViewModel : INotifyPropertyChanged
 
 
     #region REIMPRESION DE ETIQUETAS
-    public ICommand ReprintCommand => new Command(async () => await ReprintLabelAsync());
+    public ICommand ReprintCommand => new Command<string>(async (param) =>
+    {
+        if (!string.IsNullOrEmpty(param))
+            EpcToReprint = param; // Si viene de la lista, lo cargamos
+
+        await ReprintLabelAsync();
+    });
 
     public event Action ReprintFinished;
     // Agregar este campo en tu clase
@@ -333,7 +347,7 @@ public class PrinterViewModel : INotifyPropertyChanged
         }
     }
 
-    private async Task ReprintLabelAsync()
+    private async Task ReprintLabelAsyncLEGACY()
     {
         // 1. Validación inicial
         if (string.IsNullOrWhiteSpace(EpcToReprint))
@@ -426,6 +440,203 @@ public class PrinterViewModel : INotifyPropertyChanged
         }
     }
 
+    private async Task ReprintLabelAsync()
+    {
+        // 1. Validación inicial de entrada vacía
+        if (string.IsNullOrWhiteSpace(EpcToReprint))
+        {
+            await Application.Current.MainPage.DisplayAlert("Atención",
+                "Ingrese el EPC o número de etiqueta a reimprimir.", "OK");
+            return;
+        }
+
+        // 2. Detectar carácter de forzado y limpiar la cadena
+        bool forzarReimpresion = EpcToReprint.Contains("¬");
+        string cadenaLimpia = EpcToReprint.Replace("¬", "").Trim();
+
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                // 3. Validar que la cadena limpia sea un número
+                if (!int.TryParse(cadenaLimpia, out int numero))
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error",
+                        "El valor ingresado no es un número válido.", "OK");
+                    ReprintFinished?.Invoke();
+                    return;
+                }
+
+                string formattedLabel = $"080-M7623-{numero:D6}";
+
+                // --- INICIO DE VALIDACIÓN DE MOVIMIENTOS ---
+                // Llamamos a la auditoría antes de proceder
+                var audit = await GetLastMovementAsync(formattedLabel, connection);
+
+                // --- DENTRO DE ReprintLabelAsync, después de obtener 'audit' ---
+
+                if (audit != null)
+                {
+                    string mensaje;
+
+                    if (audit.TieneMovimientos)
+                    {
+                        string nombreMov = audit.TipoMov == "E" ? "📥 ENTRADA" : (audit.TipoMov == "S" ? "📤 SALIDA" : audit.TipoMov);
+                        string tiempo = audit.ObtenerTiempoTranscurrido();
+
+                        mensaje = "⚠️ HISTORIAL ENCONTRADO ⚠️\n\n" +
+                                  $"📌 Movimiento: {nombreMov}\n" +
+                                  $"📅 Fecha: {audit.FechaMov:dd/MM/yyyy HH:mm}\n" +
+                                  $"⏳ Antigüedad: Hace {tiempo}\n" +
+                                  $"📋 Estado: {audit.MstrStatus}\n\n" +
+                                  "Esta etiqueta ya ha tenido actividad operativa.\n" +
+                                  "¿ESTÁ SEGURO QUE DESEA REIMPRIMIR?";
+                    }
+                    else
+                    {
+                        mensaje = "✅ SIN MOVIMIENTOS\n\n" +
+                                  "La etiqueta no tiene historial de movimientos.\n" +
+                                  "¿Desea proceder con la reimpresión?";
+                    }
+
+                    if (!forzarReimpresion)
+                    {
+                        // Cambiamos el título según la gravedad
+                        string titulo = audit.TieneMovimientos ? "Confirmación Crítica" : "Confirmación de Impresión";
+
+                        bool continuar = await Application.Current.MainPage.DisplayAlert(
+                            titulo,
+                            mensaje,
+                            "SÍ, REIMPRIMIR",
+                            "CANCELAR");
+
+                        if (!continuar) return;
+                    }
+                }
+                // --- FIN DE VALIDACIÓN DE MOVIMIENTOS ---
+
+                // 4. Validar bloqueo de tanda actual (Memoria RAM)
+                if (_reprintedLabels.Contains(formattedLabel) && !forzarReimpresion)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Atención",
+                        $"La etiqueta {formattedLabel} ya fue reimpresa en esta tanda.", "OK");
+                    ReprintFinished?.Invoke();
+                    return;
+                }
+
+                // 5. Consultar datos para la impresión
+                string query = @"SELECT IdClaveInt, FechaCompra, IdClaveTag 
+                             FROM Tb_RFID_Catalogo 
+                             WHERE IdClaveInt = @EPC";
+
+                using SqlCommand cmd = new SqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@EPC", formattedLabel);
+
+                using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                if (!reader.HasRows)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error",
+                        "No se encontró información en el catálogo para ese EPC.", "OK");
+                    ReprintFinished?.Invoke();
+                    return;
+                }
+
+                await reader.ReadAsync();
+
+                string labelText = reader["IdClaveInt"].ToString();
+                string date = reader["FechaCompra"].ToString();
+                string name = reader["IdClaveTag"]?.ToString() ?? "";
+
+                string epc = !string.IsNullOrWhiteSpace(name)
+                    ? name
+                    : $"7623{numero:D6}";
+
+                reader.Close(); // Importante cerrar antes de las llamadas async del servicio
+
+                // 6. Impresión doble
+                await _printerService.PrintAndWriteRfidAsync(labelText, epc, date, $"{numero}");
+                await Task.Delay(250);
+                await _printerService.PrintAndWriteRfidAsync(labelText, epc, date, $"{numero}");
+
+                // 7. Registrar en el HashSet
+                if (!_reprintedLabels.Contains(labelText))
+                {
+                    _reprintedLabels.Add(labelText);
+                }
+
+                await Application.Current.MainPage.DisplayAlert("Éxito",
+                    $"Etiqueta {labelText} reimpresa correctamente.", "OK");
+
+                ReprintFinished?.Invoke();
+            }
+        }
+        catch (Exception ex)
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", $"Ocurrió un error en el proceso: {ex.Message}", "OK");
+        }
+    }
+
+    private async Task<LabelAuditInfo> GetLastMovementAsync(string formattedLabel, SqlConnection connection)
+    {
+        // Buscamos el último registro en Detalle asociado a un Maestro de movimientos
+        string query = @"
+        SELECT TOP 1 
+            C.IdClaveInt, 
+            M.TipoMov, 
+            M.FechaMov, 
+            M.Mstr_Status
+        FROM Tb_RFID_Catalogo C
+        LEFT JOIN Tb_RFID_Det D ON C.IdClaveInt = D.IdClaveInt
+        LEFT JOIN Tb_RFID_Mstr M ON D.IdConseInv = M.IdConse
+        WHERE C.IdClaveInt = @EPC
+        ORDER BY M.FechaMov DESC";
+
+        using SqlCommand cmd = new SqlCommand(query, connection);
+        cmd.Parameters.AddWithValue("@EPC", formattedLabel);
+
+        using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            return new LabelAuditInfo
+            {
+                IdClaveInt = reader["IdClaveInt"].ToString(),
+                TipoMov = reader["TipoMov"]?.ToString(),
+                FechaMov = reader["FechaMov"] != DBNull.Value ? (DateTime?)reader["FechaMov"] : null,
+                MstrStatus = reader["Mstr_Status"]?.ToString()
+            };
+        }
+        return null;
+    }
+    public class LabelAuditInfo
+    {
+        public string IdClaveInt { get; set; }
+        public string TipoMov { get; set; }
+        public DateTime? FechaMov { get; set; }
+        public string MstrStatus { get; set; }
+        public bool TieneMovimientos => FechaMov.HasValue;
+
+        // Método para obtener el tiempo transcurrido formateado
+        public string ObtenerTiempoTranscurrido()
+        {
+            if (!FechaMov.HasValue) return "N/A";
+
+            TimeSpan diferencia = DateTime.Now - FechaMov.Value;
+
+            int meses = (int)(diferencia.Days / 30.44); // Promedio de días al mes
+            int dias = diferencia.Days % 30;
+            int horas = diferencia.Hours;
+
+            string resultado = "";
+            if (meses > 0) resultado += $"{meses} {(meses == 1 ? "mes" : "meses")}, ";
+            if (dias > 0) resultado += $"{dias} {(dias == 1 ? "día" : "días")} y ";
+            resultado += $"{horas} {(horas == 1 ? "hr" : "hrs")}";
+
+            return resultado;
+        }
+    }
 
     #endregion
 
@@ -596,4 +807,92 @@ public class PrinterViewModel : INotifyPropertyChanged
 
     #endregion
 
+    #region PROPUESTAS PARA REIMPRESIÓN DE ETIQUETAS CON HISTORIAL DE MOVIMIENTOS
+    private ObservableCollection<string> _etiquetasSugeridas;
+    public ObservableCollection<string> EtiquetasSugeridas
+    {
+        get => _etiquetasSugeridas;
+        set { _etiquetasSugeridas = value; OnPropertyChanged(); }
+    }
+
+    // Comando para cargar las etiquetas desde la BD
+    // Comando para cuando se toca una etiqueta de la lista de propuestas
+    public ICommand ReprintFromListCommand => new Command<string>(async (idSeleccionado) =>
+    {
+        if (!string.IsNullOrEmpty(idSeleccionado))
+        {
+            // Extraemos el número final para que ReprintLabelAsync lo procese (ej: 000001)
+            string[] partes = idSeleccionado.Split('-');
+            if (partes.Length > 0)
+            {
+                EpcToReprint = partes[^1];
+
+                // Ejecutamos tu lógica existente de impresión y auditoría
+                await ReprintLabelAsync();
+
+                // REQUERIMIENTO: Sumar al contador de la tanda actual
+                TotalReimpresosTanda++;
+
+                // REQUERIMIENTO: Refrescar la lista para que el registro desaparezca 
+                // (Ya que ahora tendrá historial o estará en el HashSet)
+                await CargarSugerenciasAsync();
+            }
+        }
+    });
+    public ICommand CargarSugerenciasCommand => new Command(async () => await CargarSugerenciasAsync());
+
+    private async Task CargarSugerenciasAsync()
+    {
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                // Consulta que une el catálogo con IdStatus=1 y filtra las que NO están en las tablas de detalle/inventario
+                string query = @"
+                SELECT IdClaveInt 
+                FROM Tb_RFID_Catalogo 
+                WHERE IdStatus = 1 AND FechaCompra = 'MAR-2022'
+                AND IdClaveInt NOT IN (SELECT IdClaveInt FROM Tb_RFID_DetInv)
+                AND IdClaveInt NOT IN (SELECT IdClaveInt FROM Tb_RFID_Det)
+                AND FechaUltimoMovimiento IS NULL
+                ORDER BY FechaUltimoMovimiento ASC";
+
+                using SqlCommand cmd = new SqlCommand(query, connection);
+                using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                var listaTemp = new ObservableCollection<string>();
+                while (await reader.ReadAsync())
+                {
+                    listaTemp.Add(reader["IdClaveInt"].ToString());
+                }
+
+                EtiquetasSugeridas = listaTemp;
+
+                // REQUERIMIENTO: Actualizar el número total visual
+                TotalPendientes = listaTemp.Count;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error: {ex.Message}");
+        }
+    }
+    #endregion
+
+
+    private int _totalPendientes;
+    public int TotalPendientes
+    {
+        get => _totalPendientes;
+        set { _totalPendientes = value; OnPropertyChanged(); }
+    }
+
+    private int _totalReimpresosTanda;
+    public int TotalReimpresosTanda
+    {
+        get => _totalReimpresosTanda;
+        set { _totalReimpresosTanda = value; OnPropertyChanged(); }
+    }
 }
