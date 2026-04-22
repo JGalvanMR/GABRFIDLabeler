@@ -3,6 +3,14 @@
     "Windows Machine": {
       "commandName": "MsixPackage",
       "nativeDebugging": false
+    },
+    "GABRFIDLabeler - Project": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "applicationUrl": "",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }

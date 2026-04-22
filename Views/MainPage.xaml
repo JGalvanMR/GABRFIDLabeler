@@ -79,7 +79,7 @@
                                          FontSize="14"
                                          HorizontalOptions="Center"
                                          VerticalOptions="Center"
-                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=Parameters, Mode=Default}"
+                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioConverter}, ConverterParameter=Parameters, Mode=Default}"
                                          Value="Parameters">
                                 <RadioButton.TextColor>
                                     <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
@@ -100,7 +100,7 @@
                                          FontSize="14"
                                          HorizontalOptions="Center"
                                          VerticalOptions="Center"
-                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=Reimpresion, Mode=Default}">
+                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioConverter}, ConverterParameter=Reimpresion, Mode=Default}">
                                 <RadioButton.TextColor>
                                     <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
                                 </RadioButton.TextColor>
@@ -120,7 +120,7 @@
                                          FontSize="14"
                                          HorizontalOptions="Center"
                                          VerticalOptions="Center"
-                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioButtonValueToCheckedConverter}, ConverterParameter=NuevaEtiqueta, Mode=Default}">
+                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioConverter}, ConverterParameter=NuevaEtiqueta, Mode=Default}">
                                 <RadioButton.TextColor>
                                     <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
                                 </RadioButton.TextColor>
