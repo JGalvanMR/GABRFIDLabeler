@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net10.0-windows10.0.19041.0</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('android'))">$(TargetFrameworks);net10.0-android</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('ios'))">$(TargetFrameworks);net10.0-ios</TargetFrameworks>
+		<TargetFramework>net9.0-windows10.0.19041</TargetFramework>
 
 		<OutputType>Exe</OutputType>
 		<RootNamespace>GABRFIDLabeler</RootNamespace>
@@ -12,12 +10,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<ApplicationTitle>GAB Etiquetador RFID</ApplicationTitle>
-		<ApplicationId>com.gab.irapuato.rfidlabeler</ApplicationId>
+		<ApplicationId>com.mrlucky.gabrfidlabeler</ApplicationId>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
-
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 
 		<AssemblyName>GABRFIDLabeler</AssemblyName>
 		<NuGetAudit>False</NuGetAudit>
@@ -35,20 +30,21 @@
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#003087" />
 	</ItemGroup>
 
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="12.1.0"/>
+		<PackageReference Include="System.Formats.Nrbf" Version="9.0.7"/>
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.90"/>
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.90"/>
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7"/>
+		<PackageReference Include="Zebra.Printer.SDK" Version="4.0.3428"/>
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.51" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.51" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.7" />
-	</ItemGroup>
-
-	<ItemGroup Condition="$(TargetFramework.Contains('-android'))">
-		<PackageReference Include="Zebra.Printer.SDK" Version="3.0.3271" />
-	</ItemGroup>
-
-	<ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
-		<PackageReference Include="Zebra.Printer.SDK" Version="3.0.3271" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.100" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$(TargetFramework.Contains('-windows'))">
