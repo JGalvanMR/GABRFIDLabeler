@@ -6,11 +6,19 @@
     },
     "GABRFIDLabeler - Project": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
-      "applicationUrl": "",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": ""
+    },
+    "Perfil 1": {
+      "commandName": "Executable",
+      "executablePath": "C:\\GitHub\\GABRFIDLabeler\\bin\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\GABRFIDLabeler.exe",
+      "remoteDebugEnabled": true
+    },
+    "Perfil 2": {
+      "commandName": "Project"
     }
   }
 }

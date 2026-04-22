@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks>net10.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('android'))">$(TargetFrameworks);net10.0-android</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('ios'))">$(TargetFrameworks);net10.0-ios</TargetFrameworks>
+
 		<OutputType>Exe</OutputType>
 		<RootNamespace>GABRFIDLabeler</RootNamespace>
 		<UseMaui>true</UseMaui>
@@ -12,16 +15,25 @@
 		<ApplicationId>com.gab.irapuato.rfidlabeler</ApplicationId>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
+
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+
 		<AssemblyName>GABRFIDLabeler</AssemblyName>
 		<NuGetAudit>False</NuGetAudit>
 
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<WindowsPackageType>None</WindowsPackageType>
-		<Platforms>AnyCPU</Platforms>
+		<AppxPackage>false</AppxPackage>
+		<DeployOptional>true</DeployOptional>
+
+		<Platforms>AnyCPU;x64</Platforms>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#003087" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
@@ -31,15 +43,15 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.7" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
+	<ItemGroup Condition="$(TargetFramework.Contains('-android'))">
 		<PackageReference Include="Zebra.Printer.SDK" Version="3.0.3271" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
+	<ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
 		<PackageReference Include="Zebra.Printer.SDK" Version="3.0.3271" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.19041.0'">
+	<ItemGroup Condition="$(TargetFramework.Contains('-windows'))">
 		<PackageReference Include="Zebra.Printer.SDK" Version="4.0.3435" />
 	</ItemGroup>
 
@@ -52,18 +64,6 @@
 		<NoWarn>CS8767;CS8618;CS8602;CS8604;CS8600;CS8601;CS8603;CS8612;CS8625;CS0618;CS0169;CS0649;MVVMTK0045</NoWarn>
 		<AssemblyTitle>GABRFIDLabeler</AssemblyTitle>
 		<PlatformTarget>x64</PlatformTarget>
-		<AllowUnsafeBlocks>False</AllowUnsafeBlocks>
-		<IncludeSymbols>False</IncludeSymbols>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.19041.0|AnyCPU'">
-		<WarningLevel>0</WarningLevel>
-		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.19041.0|x64'">
-		<WarningLevel>0</WarningLevel>
-		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
 	</PropertyGroup>
 
 </Project>
