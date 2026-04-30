@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFramework>net9.0-windows10.0.19041</TargetFramework>
+
 		<OutputType>Exe</OutputType>
 		<RootNamespace>GABRFIDLabeler</RootNamespace>
 		<UseMaui>true</UseMaui>
@@ -9,37 +10,44 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<ApplicationTitle>GAB Etiquetador RFID</ApplicationTitle>
-		<ApplicationId>com.gab.irapuato.rfidlabeler</ApplicationId>
+		<ApplicationId>com.mrlucky.gabrfidlabeler</ApplicationId>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+
 		<AssemblyName>GABRFIDLabeler</AssemblyName>
 		<NuGetAudit>False</NuGetAudit>
 
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<WindowsPackageType>None</WindowsPackageType>
-		<Platforms>AnyCPU</Platforms>
+		<AppxPackage>false</AppxPackage>
+		<DeployOptional>true</DeployOptional>
+
+		<Platforms>AnyCPU;x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#003087" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="12.1.0"/>
+		<PackageReference Include="System.Formats.Nrbf" Version="9.0.7"/>
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.90"/>
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.90"/>
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7"/>
+		<PackageReference Include="Zebra.Printer.SDK" Version="4.0.3428"/>
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.51" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.51" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.7" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.100" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
-		<PackageReference Include="Zebra.Printer.SDK" Version="3.0.3271" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
-		<PackageReference Include="Zebra.Printer.SDK" Version="3.0.3271" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.19041.0'">
+	<ItemGroup Condition="$(TargetFramework.Contains('-windows'))">
 		<PackageReference Include="Zebra.Printer.SDK" Version="4.0.3435" />
 	</ItemGroup>
 
@@ -52,18 +60,6 @@
 		<NoWarn>CS8767;CS8618;CS8602;CS8604;CS8600;CS8601;CS8603;CS8612;CS8625;CS0618;CS0169;CS0649;MVVMTK0045</NoWarn>
 		<AssemblyTitle>GABRFIDLabeler</AssemblyTitle>
 		<PlatformTarget>x64</PlatformTarget>
-		<AllowUnsafeBlocks>False</AllowUnsafeBlocks>
-		<IncludeSymbols>False</IncludeSymbols>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.19041.0|AnyCPU'">
-		<WarningLevel>0</WarningLevel>
-		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.19041.0|x64'">
-		<WarningLevel>0</WarningLevel>
-		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
 	</PropertyGroup>
 
 </Project>

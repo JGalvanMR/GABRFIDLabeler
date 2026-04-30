@@ -1,627 +1,955 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewmodels="clr-namespace:GABRFIDLabeler.ViewModels"
-             xmlns:converters="clr-namespace:GABRFIDLabeler.Converters"
-             x:Class="GABRFIDLabeler.Views.MainPage"
-             Title="Impresión RFID"
-             x:DataType="{x:Type viewmodels:PrinterViewModel}">
+<ContentPage
+    x:Class="GABRFIDLabeler.Views.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:GABRFIDLabeler.Converters"
+    xmlns:viewmodels="clr-namespace:GABRFIDLabeler.ViewModels"
+    Title="Impresión RFID"
+    x:DataType="{x:Type viewmodels:PrinterViewModel}">
 
     <ContentPage.BackgroundColor>
-        <AppThemeBinding Light="#F5F7FA" Dark="#1E1E2E" />
+        <AppThemeBinding Dark="#0B0B10" Light="#F8FAFC" />
     </ContentPage.BackgroundColor>
 
+    <!-- ==================== RECURSOS ==================== -->
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:RadioButtonValueToCheckedConverter x:Key="RadioConverter" />
+
+            <!-- Paleta de colores centralizada -->
+            <Color x:Key="PrimaryLight">#2563EB</Color>
+            <Color x:Key="PrimaryDark">#3B82F6</Color>
+            <Color x:Key="SuccessLight">#059669</Color>
+            <Color x:Key="SuccessDark">#10B981</Color>
+            <Color x:Key="WarningLight">#D97706</Color>
+            <Color x:Key="WarningDark">#F59E0B</Color>
+            <Color x:Key="DangerLight">#DC2626</Color>
+            <Color x:Key="DangerDark">#EF4444</Color>
+            <Color x:Key="PurpleLight">#7C3AED</Color>
+            <Color x:Key="PurpleDark">#8B5CF6</Color>
+
+            <!-- Fondos -->
+            <Color x:Key="BgPageLight">#F8FAFC</Color>
+            <Color x:Key="BgPageDark">#0B0B10</Color>
+            <Color x:Key="BgCardLight">#FFFFFF</Color>
+            <Color x:Key="BgCardDark">#151520</Color>
+            <Color x:Key="BgInputLight">#F1F5F9</Color>
+            <Color x:Key="BgInputDark">#1A1A2E</Color>
+
+            <!-- Textos -->
+            <Color x:Key="TextPrimaryLight">#0F172A</Color>
+            <Color x:Key="TextPrimaryDark">#F8FAFC</Color>
+            <Color x:Key="TextSecondaryLight">#64748B</Color>
+            <Color x:Key="TextSecondaryDark">#94A3B8</Color>
+            <Color x:Key="TextMutedLight">#94A3B8</Color>
+            <Color x:Key="TextMutedDark">#475569</Color>
+
+            <!-- Borders -->
+            <Color x:Key="BorderLight">#E2E8F0</Color>
+            <Color x:Key="BorderDark">#2A2A40</Color>
+
+            <!-- ==================== ESTILOS ==================== -->
+
+            <!-- Entry plano -->
+            <Style x:Key="FlatEntry" TargetType="Entry">
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="HeightRequest" Value="44" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+
+            <!-- Frame contenedor de inputs -->
+            <Style x:Key="InputContainer" TargetType="Border">
+                <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+                <Setter Property="Padding" Value="16,0" />
+                <Setter Property="HeightRequest" Value="52" />
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BgInputLight}, Dark={StaticResource BgInputDark}}" />
+            </Style>
+
+            <!-- Botón principal -->
+            <Style x:Key="PrimaryButton" TargetType="Button">
+                <Setter Property="HeightRequest" Value="52" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="TextColor" Value="White" />
+            </Style>
+
+            <!-- Botón secundario/outline -->
+            <Style x:Key="SecondaryButton" TargetType="Button">
+                <Setter Property="HeightRequest" Value="44" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderWidth" Value="1.5" />
+            </Style>
+
+            <!-- Card principal -->
+            <Style x:Key="MainCard" TargetType="Border">
+                <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+                <Setter Property="Padding" Value="20" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BgCardLight}, Dark={StaticResource BgCardDark}}" />
+                <Setter Property="Stroke" Value="{AppThemeBinding Light=#E2E8F0, Dark=#1E1E30}" />
+            </Style>
+
+            <!-- Card de estadísticas -->
+            <Style x:Key="StatCard" TargetType="Border">
+                <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+                <Setter Property="Padding" Value="20,16" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BgCardLight}, Dark={StaticResource BgCardDark}}" />
+                <Setter Property="Stroke" Value="{AppThemeBinding Light=#E2E8F0, Dark=#1E1E30}" />
+            </Style>
+
+            <!-- Label de sección -->
+            <Style x:Key="SectionLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+            </Style>
+
+            <!-- Label de input -->
+            <Style x:Key="InputLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="Margin" Value="4,0,0,8" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+            </Style>
+
+            <!-- Badge/Tag -->
+            <Style x:Key="Badge" TargetType="Border">
+                <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+                <Setter Property="Padding" Value="12,6" />
+                <Setter Property="HorizontalOptions" Value="Start" />
+            </Style>
+
+            <!-- Visual States para botones -->
+            <Style TargetType="Button">
+                <Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal" />
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="Opacity" Value="0.85" />
+                                    <Setter Property="Scale" Value="0.98" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Disabled">
+                                <VisualState.Setters>
+                                    <Setter Property="Opacity" Value="0.5" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Setter>
+            </Style>
+
+            <!-- Visual States para Cards táctiles -->
+            <Style TargetType="Border" x:Key="InteractiveCard">
+                <Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal" />
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#F8FAFC, Dark=#1E1E35}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Setter>
+            </Style>
+
         </ResourceDictionary>
     </ContentPage.Resources>
 
+    <!-- ==================== CONTENIDO ==================== -->
     <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="24">
+        <VerticalStackLayout Padding="20,16" Spacing="20">
 
-            <!--  Título Principal  -->
-            <VerticalStackLayout Margin="0,8,0,0"
-                                 Spacing="8"
-                                 HorizontalOptions="Center">
-                <Label Text="Impresión de Etiquetas RFID"
-                       FontSize="28"
-                       HorizontalOptions="Center"
-                       FontAttributes="Bold">
-                    <Label.TextColor>
-                        <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                    </Label.TextColor>
-                </Label>
-                <Label Text="Sistema de gestión de etiquetas RFID"
-                       FontSize="14"
-                       HorizontalOptions="Center"
-                       Opacity="0.7">
-                    <Label.TextColor>
-                        <AppThemeBinding Light="#666666" Dark="#A0A0A0" />
-                    </Label.TextColor>
-                </Label>
+            <!-- ===== HEADER ===== -->
+            <VerticalStackLayout
+                Margin="0,8,0,4"
+                HorizontalOptions="Center"
+                Spacing="8">
+
+                <!-- Icono/Logo decorativo -->
+                <Border
+                    Padding="0"
+                    BackgroundColor="{AppThemeBinding Light=#EFF6FF, Dark=#1E3A5F}"
+                    HeightRequest="56"
+                    HorizontalOptions="Center"
+                    Stroke="{AppThemeBinding Light=#BFDBFE, Dark=#1E3A5F}"
+                    WidthRequest="56">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="24"
+                        HorizontalOptions="Center"
+                        Text="RF"
+                        TextColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="24"
+                    HorizontalOptions="Center"
+                    LineHeight="1.2"
+                    Text="Impresión de Etiquetas RFID"
+                    TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+
+                <Label
+                    CharacterSpacing="0.4"
+                    FontSize="13"
+                    HorizontalOptions="Center"
+                    Opacity="0.6"
+                    Text="Sistema de gestión y trazabilidad"
+                    TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
             </VerticalStackLayout>
 
-            <!--  Selector de modo  -->
-            <Frame Margin="8,0"
-                   Padding="16"
-                   CornerRadius="16"
-                   HasShadow="True">
-                <Frame.BackgroundColor>
-                    <AppThemeBinding Light="#FFFFFF" Dark="#2D2D44" />
-                </Frame.BackgroundColor>
-                <VerticalStackLayout Spacing="12">
-                    <Label Margin="4,0,0,4"
-                           Text="Modo de Operación"
-                           FontSize="13"
-                           FontAttributes="Bold">
-                        <Label.TextColor>
-                            <AppThemeBinding Light="#444444" Dark="#B0B0B0" />
-                        </Label.TextColor>
-                    </Label>
-                    <Grid HorizontalOptions="Center" ColumnSpacing="12">
+            <!-- ===== SELECTOR DE MODO (Segmented Control mejorado) ===== -->
+            <Border Style="{StaticResource MainCard}">
+                <Border.Shadow>
+                    <Shadow
+                        Brush="{AppThemeBinding Light=#000000, Dark=#000000}"
+                        Opacity="0.04"
+                        Radius="20"
+                        Offset="0,6" />
+                </Border.Shadow>
+                <VerticalStackLayout Spacing="16">
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <Border
+                            Padding="0"
+                            BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#1E1E30}"
+                            HeightRequest="32"
+                            Stroke="Transparent"
+                            WidthRequest="32">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Label
+                                FontSize="14"
+                                HorizontalOptions="Center"
+                                Text="⚡"
+                                VerticalOptions="Center" />
+                        </Border>
+                        <Label
+                            CharacterSpacing="0.8"
+                            FontAttributes="Bold"
+                            FontSize="11"
+                            Text="MODO DE OPERACIÓN"
+                            TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                            VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <!-- Grid de modos con indicador visual mejorado -->
+                    <Grid ColumnSpacing="8" HorizontalOptions="FillAndExpand">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Frame Grid.Column="0"
-                               Padding="0"
-                               CornerRadius="12"
-                               HasShadow="True">
-                            <Frame.WidthRequest>110</Frame.WidthRequest>
-                            <Frame.BackgroundColor>
-                                <AppThemeBinding Light="#E8F0FA" Dark="#3A3A55" />
-                            </Frame.BackgroundColor>
-                            <RadioButton Margin="4"
-                                         Content="Parámetros"
-                                         GroupName="Modo"
-                                         FontSize="14"
-                                         HorizontalOptions="Center"
-                                         VerticalOptions="Center"
-                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioConverter}, ConverterParameter=Parameters, Mode=Default}"
-                                         Value="Parameters">
-                                <RadioButton.TextColor>
-                                    <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                                </RadioButton.TextColor>
-                            </RadioButton>
-                        </Frame>
-                        <Frame Grid.Column="1"
-                               Padding="0"
-                               CornerRadius="12"
-                               HasShadow="True">
-                            <Frame.WidthRequest>110</Frame.WidthRequest>
-                            <Frame.BackgroundColor>
-                                <AppThemeBinding Light="#E8F0FA" Dark="#3A3A55" />
-                            </Frame.BackgroundColor>
-                            <RadioButton Margin="4"
-                                         Content="Reimpresión"
-                                         GroupName="Modo"
-                                         FontSize="14"
-                                         HorizontalOptions="Center"
-                                         VerticalOptions="Center"
-                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioConverter}, ConverterParameter=Reimpresion, Mode=Default}">
-                                <RadioButton.TextColor>
-                                    <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                                </RadioButton.TextColor>
-                            </RadioButton>
-                        </Frame>
-                        <Frame Grid.Column="2"
-                               Padding="0"
-                               CornerRadius="12"
-                               HasShadow="True">
-                            <Frame.WidthRequest>120</Frame.WidthRequest>
-                            <Frame.BackgroundColor>
-                                <AppThemeBinding Light="#E8F0FA" Dark="#3A3A55" />
-                            </Frame.BackgroundColor>
-                            <RadioButton Margin="4"
-                                         Content="Nueva Etiqueta"
-                                         GroupName="Modo"
-                                         FontSize="14"
-                                         HorizontalOptions="Center"
-                                         VerticalOptions="Center"
-                                         IsChecked="{Binding SelectedMode, Converter={StaticResource RadioConverter}, ConverterParameter=NuevaEtiqueta, Mode=Default}">
-                                <RadioButton.TextColor>
-                                    <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                                </RadioButton.TextColor>
-                            </RadioButton>
-                        </Frame>
+
+                        <!-- Modo 1 -->
+                        <Border
+                            Grid.Column="0"
+                            Padding="2"
+                            BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#1E1E30}"
+                            Stroke="{AppThemeBinding Light=#E2E8F0, Dark=#2A2A42}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <RadioButton
+                                Margin="2"
+                                Content="Parámetros"
+                                FontSize="12"
+                                GroupName="Modo"
+                                HorizontalOptions="Center"
+                                IsChecked="{Binding SelectedMode, Converter={StaticResource RadioConverter}, ConverterParameter=Parameters, Mode=Default}"
+                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                VerticalOptions="Center"
+                                Value="Parameters" />
+                        </Border>
+
+                        <!-- Modo 2 -->
+                        <Border
+                            Grid.Column="1"
+                            Padding="2"
+                            BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#1E1E30}"
+                            Stroke="{AppThemeBinding Light=#E2E8F0, Dark=#2A2A42}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <RadioButton
+                                Margin="2"
+                                Content="Reimpresión"
+                                FontSize="12"
+                                GroupName="Modo"
+                                HorizontalOptions="Center"
+                                IsChecked="{Binding SelectedMode, Converter={StaticResource RadioConverter}, ConverterParameter=Reimpresion, Mode=Default}"
+                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                VerticalOptions="Center" />
+                        </Border>
+
+                        <!-- Modo 3 -->
+                        <Border
+                            Grid.Column="2"
+                            Padding="2"
+                            BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#1E1E30}"
+                            Stroke="{AppThemeBinding Light=#E2E8F0, Dark=#2A2A42}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <RadioButton
+                                Margin="2"
+                                Content="Nueva Etiqueta"
+                                FontSize="12"
+                                GroupName="Modo"
+                                HorizontalOptions="Center"
+                                IsChecked="{Binding SelectedMode, Converter={StaticResource RadioConverter}, ConverterParameter=NuevaEtiqueta, Mode=Default}"
+                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                VerticalOptions="Center" />
+                        </Border>
                     </Grid>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
-            <Grid Margin="8,0"
-                  ColumnDefinitions="*,*"
-                  ColumnSpacing="12">
+            <!-- ===== ESTADÍSTICAS ===== -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
 
-                <Frame Grid.Column="0"
-                       Padding="16"
-                       CornerRadius="16"
-                       HasShadow="True">
-                    <Frame.BackgroundColor>
-                        <AppThemeBinding Light="#FFFFFF" Dark="#2D2D44" />
-                    </Frame.BackgroundColor>
-                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                        <Label Text="Impresas"
-                               FontSize="12"
-                               TextColor="#6B7280"
-                               HorizontalOptions="Center" />
-                        <Label Text="{Binding TotalReimpresosTanda}"
-                               FontSize="24"
-                               FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#2563EB,
-                                                           Dark=#3B82F6}"
-                               HorizontalOptions="Center" />
+                <!-- Stat 1 -->
+                <Border Grid.Column="0" Style="{StaticResource StatCard}">
+                    <Border.Shadow>
+                        <Shadow
+                            Brush="{StaticResource PrimaryLight}"
+                            Opacity="0.06"
+                            Radius="16"
+                            Offset="0,4" />
+                    </Border.Shadow>
+                    <VerticalStackLayout HorizontalOptions="Center" Spacing="6">
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="6">
+                            <BoxView
+                                CornerRadius="3"
+                                HeightRequest="8"
+                                VerticalOptions="Center"
+                                WidthRequest="8"
+                                Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                            <Label
+                                CharacterSpacing="0.5"
+                                FontAttributes="Bold"
+                                FontSize="11"
+                                Text="IMPRESAS"
+                                TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                                VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="32"
+                            HorizontalOptions="Center"
+                            Text="{Binding TotalReimpresosTanda}"
+                            TextColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                        <Label
+                            FontSize="11"
+                            HorizontalOptions="Center"
+                            Opacity="0.7"
+                            Text="etiquetas totales"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
 
-                <Frame Grid.Column="1"
-                       Padding="16"
-                       CornerRadius="16"
-                       HasShadow="True">
-                    <Frame.BackgroundColor>
-                        <AppThemeBinding Light="#FFFFFF" Dark="#2D2D44" />
-                    </Frame.BackgroundColor>
-                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                        <Label Text="En Lote"
-                               FontSize="12"
-                               TextColor="#6B7280"
-                               HorizontalOptions="Center" />
-                        <Label Text="{Binding LabelsToPrint}"
-                               FontSize="24"
-                               FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#059669,
-                                                           Dark=#10B981}"
-                               HorizontalOptions="Center" />
+                <!-- Stat 2 -->
+                <Border Grid.Column="1" Style="{StaticResource StatCard}">
+                    <Border.Shadow>
+                        <Shadow
+                            Brush="{StaticResource SuccessLight}"
+                            Opacity="0.06"
+                            Radius="16"
+                            Offset="0,4" />
+                    </Border.Shadow>
+                    <VerticalStackLayout HorizontalOptions="Center" Spacing="6">
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="6">
+                            <BoxView
+                                CornerRadius="3"
+                                HeightRequest="8"
+                                VerticalOptions="Center"
+                                WidthRequest="8"
+                                Color="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                            <Label
+                                CharacterSpacing="0.5"
+                                FontAttributes="Bold"
+                                FontSize="11"
+                                Text="EN LOTE"
+                                TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                                VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="32"
+                            HorizontalOptions="Center"
+                            Text="{Binding LabelsToPrint}"
+                            TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                        <Label
+                            FontSize="11"
+                            HorizontalOptions="Center"
+                            Opacity="0.7"
+                            Text="pendientes"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
             </Grid>
 
-            <!--  Conexión  -->
-            <Frame Margin="8,0"
-                   Padding="20"
-                   CornerRadius="16"
-                   HasShadow="True">
-                <Frame.BackgroundColor>
-                    <AppThemeBinding Light="#FFFFFF" Dark="#2D2D44" />
-                </Frame.BackgroundColor>
-                <Frame.Shadow>
-                    <Shadow Brush="Black"
-                            Opacity="0.1"
-                            Radius="8"
-                            Offset="0,4" />
-                </Frame.Shadow>
+            <!-- ===== CONEXIÓN ===== -->
+            <Border Style="{StaticResource MainCard}">
+                <Border.Shadow>
+                    <Shadow
+                        Brush="#000000"
+                        Opacity="0.04"
+                        Radius="20"
+                        Offset="0,6" />
+                </Border.Shadow>
                 <VerticalStackLayout Spacing="16">
-                    <HorizontalStackLayout Spacing="10">
-                        <Label Text="⚙"
-                               FontSize="18"
-                               VerticalOptions="Center" />
-                        <Label Text="Configuración de Impresora"
-                               FontSize="17"
-                               FontAttributes="Bold"
-                               VerticalOptions="Center">
-                            <Label.TextColor>
-                                <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                            </Label.TextColor>
-                        </Label>
-                    </HorizontalStackLayout>
 
-                    <Frame Margin="0"
-                           Padding="14,12"
-                           CornerRadius="12"
-                           HasShadow="False">
-                        <Frame.BackgroundColor>
-                            <AppThemeBinding Light="#F8F9FB" Dark="#252538" />
-                        </Frame.BackgroundColor>
-                        <Frame.BorderColor>
-                            <AppThemeBinding Light="#E0E4EA" Dark="#3A3A50" />
-                        </Frame.BorderColor>
-                        <Entry Placeholder="IP de la impresora"
-                               Text="{Binding PrinterIp}"
-                               Keyboard="Url"
-                               FontSize="15"
-                               BackgroundColor="Transparent">
-                            <Entry.PlaceholderColor>
-                                <AppThemeBinding Light="#9CA3AF" Dark="#7A7A90" />
-                            </Entry.PlaceholderColor>
-                            <Entry.TextColor>
-                                <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                            </Entry.TextColor>
-                        </Entry>
-                    </Frame>
-
-                    <Button Style="{StaticResource PrimaryButton}"
-                            Text="Conectar"
-                            Command="{Binding ConnectCommand}"
-                            HeightRequest="48"
-                            FontSize="15"
-                            FontAttributes="Bold"
-                            CornerRadius="12" />
-                </VerticalStackLayout>
-            </Frame>
-
-            <!--  Parámetros de impresión  -->
-            <Frame Margin="8,0"
-                   Padding="20"
-                   Style="{StaticResource CardStyle}"
-                   IsVisible="{Binding IsImpresionVisible}"
-                   CornerRadius="16"
-                   HasShadow="True">
-                <Frame.BackgroundColor>
-                    <AppThemeBinding Light="#FFFFFF" Dark="#2D2D44" />
-                </Frame.BackgroundColor>
-                <Frame.Shadow>
-                    <Shadow Brush="Black"
-                            Opacity="0.1"
-                            Radius="8"
-                            Offset="0,4" />
-                </Frame.Shadow>
-                <VerticalStackLayout Spacing="16">
-                    <HorizontalStackLayout Spacing="10">
-                        <Label Text="📋"
-                               FontSize="18"
-                               VerticalOptions="Center" />
-                        <Label Text="Parámetros de Impresión"
-                               FontSize="17"
-                               FontAttributes="Bold"
-                               VerticalOptions="Center">
-                            <Label.TextColor>
-                                <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                            </Label.TextColor>
-                        </Label>
-                    </HorizontalStackLayout>
-
-                    <Frame Padding="14,12"
-                           CornerRadius="12"
-                           HasShadow="False">
-                        <Frame.BackgroundColor>
-                            <AppThemeBinding Light="#F8F9FB" Dark="#252538" />
-                        </Frame.BackgroundColor>
-                        <Frame.BorderColor>
-                            <AppThemeBinding Light="#E0E4EA" Dark="#3A3A50" />
-                        </Frame.BorderColor>
-                        <Entry Placeholder="Fecha de compra (Ej. MAR-2025)"
-                               Text="{Binding Date}"
-                               TextTransform="Uppercase"
-                               FontSize="15"
-                               BackgroundColor="Transparent">
-                            <Entry.PlaceholderColor>
-                                <AppThemeBinding Light="#9CA3AF" Dark="#7A7A90" />
-                            </Entry.PlaceholderColor>
-                            <Entry.TextColor>
-                                <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                            </Entry.TextColor>
-                        </Entry>
-                    </Frame>
-
-                    <Frame Padding="14,12"
-                           CornerRadius="12"
-                           HasShadow="False">
-                        <Frame.BackgroundColor>
-                            <AppThemeBinding Light="#F8F9FB" Dark="#252538" />
-                        </Frame.BackgroundColor>
-                        <Frame.BorderColor>
-                            <AppThemeBinding Light="#E0E4EA" Dark="#3A3A50" />
-                        </Frame.BorderColor>
-                        <Entry Placeholder="Número de la última etiqueta impresa"
-                               Text="{Binding LabelPrint}"
-                               Keyboard="Numeric"
-                               FontSize="15"
-                               BackgroundColor="Transparent">
-                            <Entry.PlaceholderColor>
-                                <AppThemeBinding Light="#9CA3AF" Dark="#7A7A90" />
-                            </Entry.PlaceholderColor>
-                            <Entry.TextColor>
-                                <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                            </Entry.TextColor>
-                        </Entry>
-                    </Frame>
-
-                    <Frame Padding="14,12"
-                           CornerRadius="12"
-                           HasShadow="False">
-                        <Frame.BackgroundColor>
-                            <AppThemeBinding Light="#F8F9FB" Dark="#252538" />
-                        </Frame.BackgroundColor>
-                        <Frame.BorderColor>
-                            <AppThemeBinding Light="#E0E4EA" Dark="#3A3A50" />
-                        </Frame.BorderColor>
-                        <Entry Placeholder="Cantidad de etiquetas a imprimir"
-                               Text="{Binding LabelsToPrint}"
-                               Keyboard="Numeric"
-                               FontSize="15"
-                               BackgroundColor="Transparent">
-                            <Entry.PlaceholderColor>
-                                <AppThemeBinding Light="#9CA3AF" Dark="#7A7A90" />
-                            </Entry.PlaceholderColor>
-                            <Entry.TextColor>
-                                <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                            </Entry.TextColor>
-                        </Entry>
-                    </Frame>
-
-                    <!--  Acciones  -->
-                    <VerticalStackLayout Margin="0,4,0,0" Spacing="12">
-                        <Button Style="{StaticResource PrimaryButton}"
-                                Text="Imprimir lote de etiquetas"
-                                Command="{Binding PrintBatchCommand}"
-                                HeightRequest="52"
+                    <!-- Header de sección -->
+                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                        <Border
+                            Padding="0"
+                            BackgroundColor="{AppThemeBinding Light=#EFF6FF, Dark=#1E3A5F}"
+                            HeightRequest="36"
+                            Stroke="Transparent"
+                            WidthRequest="36">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Label
                                 FontSize="16"
-                                FontAttributes="Bold"
-                                CornerRadius="12">
+                                HorizontalOptions="Center"
+                                Text="⚙"
+                                TextColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}"
+                                VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                            <Label Style="{StaticResource SectionLabel}" Text="Configuración de Impresora" />
+                            <Label
+                                FontSize="11"
+                                IsVisible="{Binding IsPrinterConnected}"
+                                Text="Conectado"
+                                TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding IsPrinterConnected}"
+                                        TargetType="Label"
+                                        Value="False">
+                                        <Setter Property="Text" Value="Desconectado" />
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+
+                    <!-- Input IP -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Style="{StaticResource InputLabel}" Text="Dirección IP" />
+                        <Border Style="{StaticResource InputContainer}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label
+                                    Grid.Column="0"
+                                    FontFamily="{OnPlatform iOS=SF Pro Display, Android=monospace}"
+                                    FontSize="16"
+                                    Text="🌐"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                                    VerticalOptions="Center" />
+                                <Entry
+                                    Grid.Column="1"
+                                    Keyboard="Url"
+                                    Placeholder="192.168.1.100"
+                                    Style="{StaticResource FlatEntry}"
+                                    Text="{Binding PrinterIp}">
+                                    <Entry.PlaceholderColor>
+                                        <AppThemeBinding Light=#CBD5E1 Dark=#475569 />
+                                    </Entry.PlaceholderColor>
+                                    <Entry.TextColor>
+                                        <AppThemeBinding Light={StaticResource TextPrimaryLight} Dark={StaticResource TextPrimaryDark} />
+                                    </Entry.TextColor>
+                                </Entry>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Botón conector -->
+                    <Button
+                        Command="{Binding ConnectCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Text="Conectar">
+                        <Button.BackgroundColor>
+                            <AppThemeBinding Light={StaticResource PrimaryLight} Dark={StaticResource PrimaryDark} />
+                        </Button.BackgroundColor>
+                        <Button.Shadow>
+                            <Shadow
+                                Brush="{StaticResource PrimaryLight}"
+                                Opacity="0.2"
+                                Radius="12"
+                                Offset="0,4" />
+                        </Button.Shadow>
+                    </Button>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ===== PARÁMETROS DE IMPRESIÓN ===== -->
+            <Border IsVisible="{Binding IsImpresionVisible}" Style="{StaticResource MainCard}">
+                <Border.Shadow>
+                    <Shadow
+                        Brush="#000000"
+                        Opacity="0.04"
+                        Radius="20"
+                        Offset="0,6" />
+                </Border.Shadow>
+                <VerticalStackLayout Spacing="16">
+
+                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                        <Border
+                            Padding="0"
+                            BackgroundColor="{AppThemeBinding Light=#EFF6FF, Dark=#1E3A5F}"
+                            HeightRequest="36"
+                            Stroke="Transparent"
+                            WidthRequest="36">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Label
+                                FontSize="16"
+                                HorizontalOptions="Center"
+                                Text="📋"
+                                TextColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}"
+                                VerticalOptions="Center" />
+                        </Border>
+                        <Label Style="{StaticResource SectionLabel}" Text="Parámetros de Impresión" />
+                    </HorizontalStackLayout>
+
+                    <!-- Fecha -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Style="{StaticResource InputLabel}" Text="Fecha de compra" />
+                        <Border Style="{StaticResource InputContainer}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label
+                                    Grid.Column="0"
+                                    FontSize="16"
+                                    Text="📅"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                                    VerticalOptions="Center" />
+                                <Entry
+                                    Grid.Column="1"
+                                    Placeholder="Ej. MAR-2025"
+                                    Style="{StaticResource FlatEntry}"
+                                    Text="{Binding Date}"
+                                    TextTransform="Uppercase">
+                                    <Entry.PlaceholderColor>
+                                        <AppThemeBinding Light=#CBD5E1 Dark=#475569 />
+                                    </Entry.PlaceholderColor>
+                                    <Entry.TextColor>
+                                        <AppThemeBinding Light={StaticResource TextPrimaryLight} Dark={StaticResource TextPrimaryDark} />
+                                    </Entry.TextColor>
+                                </Entry>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Última etiqueta -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Style="{StaticResource InputLabel}" Text="Última etiqueta impresa" />
+                        <Border Style="{StaticResource InputContainer}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label
+                                    Grid.Column="0"
+                                    FontSize="16"
+                                    Text="🏷"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                                    VerticalOptions="Center" />
+                                <Entry
+                                    Grid.Column="1"
+                                    Keyboard="Numeric"
+                                    Placeholder="Número de etiqueta"
+                                    Style="{StaticResource FlatEntry}"
+                                    Text="{Binding LabelPrint}">
+                                    <Entry.PlaceholderColor>
+                                        <AppThemeBinding Light=#CBD5E1 Dark=#475569 />
+                                    </Entry.PlaceholderColor>
+                                    <Entry.TextColor>
+                                        <AppThemeBinding Light={StaticResource TextPrimaryLight} Dark={StaticResource TextPrimaryDark} />
+                                    </Entry.TextColor>
+                                </Entry>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Cantidad -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Style="{StaticResource InputLabel}" Text="Cantidad a imprimir" />
+                        <Border Style="{StaticResource InputContainer}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label
+                                    Grid.Column="0"
+                                    FontSize="16"
+                                    Text="🔢"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                                    VerticalOptions="Center" />
+                                <Entry
+                                    Grid.Column="1"
+                                    Keyboard="Numeric"
+                                    Placeholder="Ej. 50"
+                                    Style="{StaticResource FlatEntry}"
+                                    Text="{Binding LabelsToPrint}">
+                                    <Entry.PlaceholderColor>
+                                        <AppThemeBinding Light=#CBD5E1 Dark=#475569 />
+                                    </Entry.PlaceholderColor>
+                                    <Entry.TextColor>
+                                        <AppThemeBinding Light={StaticResource TextPrimaryLight} Dark={StaticResource TextPrimaryDark} />
+                                    </Entry.TextColor>
+                                </Entry>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Acciones -->
+                    <VerticalStackLayout Margin="0,8,0,0" Spacing="12">
+                        <Button
+                            Command="{Binding PrintBatchCommand}"
+                            CornerRadius="14"
+                            FontAttributes="Bold"
+                            FontSize="16"
+                            HeightRequest="56"
+                            Style="{StaticResource PrimaryButton}"
+                            Text="▶  Imprimir lote de etiquetas">
                             <Button.BackgroundColor>
-                                <AppThemeBinding Light="#2563EB" Dark="#3B82F6" />
+                                <AppThemeBinding Light={StaticResource PrimaryLight} Dark={StaticResource PrimaryDark} />
                             </Button.BackgroundColor>
                             <Button.TextColor>
-                                <AppThemeBinding Light="#FFFFFF" Dark="#FFFFFF" />
+                                <AppThemeBinding Light=#FFFFFF Dark=#FFFFFF />
                             </Button.TextColor>
                             <Button.Shadow>
-                                <Shadow Brush="#2563EB"
-                                        Opacity="0.3"
-                                        Radius="6"
-                                        Offset="0,3" />
+                                <Shadow
+                                    Brush="{StaticResource PrimaryLight}"
+                                    Opacity="0.25"
+                                    Radius="14"
+                                    Offset="0,6" />
                             </Button.Shadow>
                         </Button>
-                        <Button Style="{StaticResource PrimaryButton}"
-                                Text="Impresión simple"
-                                Command="{Binding PrintSingleCommand}"
-                                IsVisible="False"
-                                IsEnabled="False"
-                                HeightRequest="44"
-                                FontSize="14"
-                                CornerRadius="10" />
+
+                        <Button
+                            Command="{Binding PrintSingleCommand}"
+                            CornerRadius="12"
+                            FontSize="14"
+                            HeightRequest="44"
+                            IsEnabled="False"
+                            IsVisible="False"
+                            Style="{StaticResource SecondaryButton}"
+                            Text="Impresión simple">
+                            <Button.TextColor>
+                                <AppThemeBinding Light={StaticResource TextSecondaryLight} Dark={StaticResource TextSecondaryDark} />
+                            </Button.TextColor>
+                            <Button.BorderColor>
+                                <AppThemeBinding Light={StaticResource BorderLight} Dark={StaticResource BorderDark} />
+                            </Button.BorderColor>
+                        </Button>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
-            <!--  Reimpresión de etiquetas  -->
-            <Frame Margin="8,0"
-                   Padding="20"
-                   Style="{StaticResource CardStyle}"
-                   IsVisible="{Binding IsReimpresionVisible}"
-                   CornerRadius="16"
-                   HasShadow="True">
-                <Frame.BackgroundColor>
-                    <AppThemeBinding Light="#FFFFFF" Dark="#2D2D44" />
-                </Frame.BackgroundColor>
-                <Frame.Shadow>
-                    <Shadow Brush="Black"
-                            Opacity="0.1"
-                            Radius="8"
-                            Offset="0,4" />
-                </Frame.Shadow>
+            <!-- ===== REIMPRESIÓN ===== -->
+            <Border IsVisible="{Binding IsReimpresionVisible}" Style="{StaticResource MainCard}">
+                <Border.Shadow>
+                    <Shadow
+                        Brush="#000000"
+                        Opacity="0.04"
+                        Radius="20"
+                        Offset="0,6" />
+                </Border.Shadow>
                 <VerticalStackLayout Spacing="16">
-                    <HorizontalStackLayout Spacing="10">
-                        <Label Text="🔄"
-                               FontSize="18"
-                               VerticalOptions="Center" />
-                        <Label Text="Reimpresión de Etiquetas"
-                               FontAttributes="Bold"
-                               FontSize="17"
-                               VerticalOptions="Center">
-                            <Label.TextColor>
-                                <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                            </Label.TextColor>
-                        </Label>
+
+                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                        <Border
+                            Padding="0"
+                            BackgroundColor="{AppThemeBinding Light=#F5F3FF, Dark=#2E1065}"
+                            HeightRequest="36"
+                            Stroke="Transparent"
+                            WidthRequest="36">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Label
+                                FontSize="16"
+                                HorizontalOptions="Center"
+                                Text="🔄"
+                                TextColor="{AppThemeBinding Light={StaticResource PurpleLight}, Dark={StaticResource PurpleDark}}"
+                                VerticalOptions="Center" />
+                        </Border>
+                        <Label Style="{StaticResource SectionLabel}" Text="Reimpresión de Etiquetas" />
                     </HorizontalStackLayout>
 
-                    <Frame Padding="14,12"
-                           CornerRadius="12"
-                           HasShadow="False">
-                        <Frame.BackgroundColor>
-                            <AppThemeBinding Light="#F8F9FB" Dark="#252538" />
-                        </Frame.BackgroundColor>
-                        <Frame.BorderColor>
-                            <AppThemeBinding Light="#E0E4EA" Dark="#3A3A50" />
-                        </Frame.BorderColor>
-                        <Entry x:Name="EpcEntry"
-                               Placeholder="EPC o número de etiqueta"
-                               Text="{Binding EpcToReprint}"
-                               FontSize="15"
-                               BackgroundColor="Transparent">
-                            <Entry.PlaceholderColor>
-                                <AppThemeBinding Light="#9CA3AF" Dark="#7A7A90" />
-                            </Entry.PlaceholderColor>
-                            <Entry.TextColor>
-                                <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                            </Entry.TextColor>
-                        </Entry>
-                    </Frame>
+                    <!-- Input EPC -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Style="{StaticResource InputLabel}" Text="EPC o número de etiqueta" />
+                        <Border Style="{StaticResource InputContainer}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label
+                                    Grid.Column="0"
+                                    FontSize="16"
+                                    Text="📡"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                                    VerticalOptions="Center" />
+                                <Entry
+                                    x:Name="EpcEntry"
+                                    Grid.Column="1"
+                                    Placeholder="Escanear o escribir..."
+                                    Style="{StaticResource FlatEntry}"
+                                    Text="{Binding EpcToReprint}">
+                                    <Entry.PlaceholderColor>
+                                        <AppThemeBinding Light=#CBD5E1 Dark=#475569 />
+                                    </Entry.PlaceholderColor>
+                                    <Entry.TextColor>
+                                        <AppThemeBinding Light={StaticResource TextPrimaryLight} Dark={StaticResource TextPrimaryDark} />
+                                    </Entry.TextColor>
+                                </Entry>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
 
-                    <Button Style="{StaticResource PrimaryButton}"
-                            Text="Reimprimir Manual"
-                            Command="{Binding ReprintCommand}"
-                            HeightRequest="48"
-                            FontSize="15"
-                            FontAttributes="Bold"
-                            CornerRadius="12">
+                    <Button
+                        Command="{Binding ReprintCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Text="↻  Reimprimir Manual">
                         <Button.BackgroundColor>
-                            <AppThemeBinding Light="#7C3AED" Dark="#8B5CF6" />
+                            <AppThemeBinding Light={StaticResource PurpleLight} Dark={StaticResource PurpleDark} />
                         </Button.BackgroundColor>
                         <Button.TextColor>
-                            <AppThemeBinding Light="#FFFFFF" Dark="#FFFFFF" />
+                            <AppThemeBinding Light=#FFFFFF Dark=#FFFFFF />
                         </Button.TextColor>
                         <Button.Shadow>
-                            <Shadow Brush="#7C3AED"
-                                    Opacity="0.3"
-                                    Radius="6"
-                                    Offset="0,3" />
+                            <Shadow
+                                Brush="{StaticResource PurpleLight}"
+                                Opacity="0.25"
+                                Radius="12"
+                                Offset="0,4" />
                         </Button.Shadow>
                     </Button>
 
-                    <BoxView Margin="0,4"
-                             HeightRequest="1"
-                             Opacity="0.5">
-                        <BoxView.Color>
-                            <AppThemeBinding Light="#E5E7EB" Dark="#3A3A50" />
-                        </BoxView.Color>
-                    </BoxView>
+                    <!-- Separador -->
+                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#F1F5F9, Dark=#2A2A42}" />
 
-                    <VerticalStackLayout Spacing="10">
-                        <Label Margin="4,0,0,0"
-                               Text="Propuestas (Sin movimientos):"
-                               FontSize="13"
-                               FontAttributes="Bold">
-                            <Label.TextColor>
-                                <AppThemeBinding Light="#6B7280" Dark="#9CA3AF" />
-                            </Label.TextColor>
-                        </Label>
+                    <!-- Lista de sugerencias -->
+                    <VerticalStackLayout Spacing="12">
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <Label
+                                CharacterSpacing="1"
+                                FontAttributes="Bold"
+                                FontSize="10"
+                                Text="PROPUESTAS SIN MOVIMIENTOS"
+                                TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                                VerticalOptions="Center" />
+                            <Border
+                                Padding="6,2"
+                                BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#1E1E30}"
+                                HorizontalOptions="Start"
+                                Stroke="Transparent">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10" />
+                                </Border.StrokeShape>
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="10"
+                                    Text="{Binding EtiquetasSugeridas.Count, StringFormat='{}{0}'}"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            </Border>
+                        </HorizontalStackLayout>
 
-                        <Frame Padding="0"
-                               CornerRadius="12"
-                               HasShadow="False"
-                               BorderColor="{AppThemeBinding Light=#E8ECF0,
-                                                             Dark=#3A3A50}"
-                               BackgroundColor="Transparent">
-                            <CollectionView ItemsSource="{Binding EtiquetasSugeridas}" HeightRequest="250">
+                        <Border
+                            Padding="4"
+                            BackgroundColor="Transparent"
+                            Stroke="{AppThemeBinding Light=#F1F5F9, Dark=#2A2A42}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14" />
+                            </Border.StrokeShape>
+                            <CollectionView
+                                HeightRequest="260"
+                                ItemsSource="{Binding EtiquetasSugeridas}"
+                                SelectionMode="None">
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Padding="8,6">
-                                            <Button Margin="4,2"
-                                                    Text="{Binding .}"
-                                                    FontSize="14"
-                                                    BackgroundColor="{AppThemeBinding Light=#F3F4F6,
-                                                                                      Dark=#3A3A55}"
-                                                    TextColor="{AppThemeBinding Light=#374151,
-                                                                                Dark=#E5E7EB}"
-                                                    CornerRadius="10"
-                                                    HeightRequest="40"
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:PrinterViewModel}}, Path=ReprintFromListCommand}"
-                                                    CommandParameter="{Binding .}">
-                                                <Button.BorderColor>
-                                                    <AppThemeBinding Light="#D1D5DB" Dark="#4B5563" />
-                                                </Button.BorderColor>
-                                                <Button.BorderWidth>
-                                                    <AppThemeBinding Light="1" Dark="1" />
-                                                </Button.BorderWidth>
-                                                <Button.Shadow>
-                                                    <Shadow Brush="Black"
-                                                            Opacity="0.05"
-                                                            Radius="2"
-                                                            Offset="0,1" />
-                                                </Button.Shadow>
-                                            </Button>
+                                        <Grid Padding="4,3">
+                                            <Border
+                                                Padding="14,0"
+                                                BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#16162A}"
+                                                HeightRequest="48"
+                                                Stroke="{AppThemeBinding Light=#E2E8F0, Dark=#2D2D48}"
+                                                Style="{StaticResource InteractiveCard}">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="12" />
+                                                </Border.StrokeShape>
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:PrinterViewModel}}, Path=ReprintFromListCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                                    <Label
+                                                        Grid.Column="0"
+                                                        FontSize="14"
+                                                        Text="🏷"
+                                                        TextColor="{AppThemeBinding Light={StaticResource PurpleLight}, Dark={StaticResource PurpleDark}}"
+                                                        VerticalOptions="Center" />
+                                                    <Label
+                                                        Grid.Column="1"
+                                                        FontSize="14"
+                                                        Text="{Binding .}"
+                                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                                        VerticalOptions="Center" />
+                                                    <Label
+                                                        Grid.Column="2"
+                                                        FontSize="12"
+                                                        Text="↻"
+                                                        TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                                                        VerticalOptions="Center" />
+                                                </Grid>
+                                            </Border>
                                         </Grid>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>
+
                                 <CollectionView.EmptyView>
-                                    <Frame Padding="20,30"
-                                           CornerRadius="12"
-                                           HasShadow="False">
-                                        <Frame.BackgroundColor>
-                                            <AppThemeBinding Light="#F9FAFB" Dark="#252538" />
-                                        </Frame.BackgroundColor>
-                                        <VerticalStackLayout HorizontalOptions="Center" Spacing="8">
-                                            <Label Text="📭"
-                                                   FontSize="32"
-                                                   HorizontalOptions="Center" />
-                                            <Label Text="No hay etiquetas pendientes"
-                                                   FontSize="13"
-                                                   HorizontalOptions="Center"
-                                                   HorizontalTextAlignment="Center">
-                                                <Label.TextColor>
-                                                    <AppThemeBinding Light="#9CA3AF" Dark="#7A7A90" />
-                                                </Label.TextColor>
-                                            </Label>
-                                            <Label Text="de primer movimiento."
-                                                   FontSize="13"
-                                                   HorizontalOptions="Center"
-                                                   HorizontalTextAlignment="Center">
-                                                <Label.TextColor>
-                                                    <AppThemeBinding Light="#9CA3AF" Dark="#7A7A90" />
-                                                </Label.TextColor>
-                                            </Label>
-                                        </VerticalStackLayout>
-                                    </Frame>
+                                    <VerticalStackLayout
+                                        Padding="20,50"
+                                        HorizontalOptions="Center"
+                                        Spacing="12"
+                                        VerticalOptions="Center">
+                                        <Border
+                                            Padding="0"
+                                            BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#1A1A30}"
+                                            HeightRequest="64"
+                                            HorizontalOptions="Center"
+                                            Stroke="Transparent"
+                                            WidthRequest="64">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="20" />
+                                            </Border.StrokeShape>
+                                            <Label
+                                                FontSize="28"
+                                                HorizontalOptions="Center"
+                                                Text="📭"
+                                                VerticalOptions="Center" />
+                                        </Border>
+                                        <Label
+                                            FontAttributes="Bold"
+                                            FontSize="14"
+                                            HorizontalOptions="Center"
+                                            HorizontalTextAlignment="Center"
+                                            Text="Sin etiquetas pendientes"
+                                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                        <Label
+                                            FontSize="12"
+                                            HorizontalOptions="Center"
+                                            HorizontalTextAlignment="Center"
+                                            Opacity="0.7"
+                                            Text="No se encontraron etiquetas sin primer movimiento"
+                                            TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}" />
+                                    </VerticalStackLayout>
                                 </CollectionView.EmptyView>
                             </CollectionView>
-                        </Frame>
+                        </Border>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
-            <!--  NUEVAS ETIQUETAS  -->
-            <Frame Margin="8,0"
-                   Padding="20"
-                   Style="{StaticResource CardStyle}"
-                   IsVisible="{Binding IsNuevaEtiquetaVisible}"
-                   CornerRadius="16"
-                   HasShadow="True">
-                <Frame.BackgroundColor>
-                    <AppThemeBinding Light="#FFFFFF" Dark="#2D2D44" />
-                </Frame.BackgroundColor>
-                <Frame.Shadow>
-                    <Shadow Brush="Black"
-                            Opacity="0.1"
-                            Radius="8"
-                            Offset="0,4" />
-                </Frame.Shadow>
+            <!-- ===== NUEVAS ETIQUETAS ===== -->
+            <Border IsVisible="{Binding IsNuevaEtiquetaVisible}" Style="{StaticResource MainCard}">
+                <Border.Shadow>
+                    <Shadow
+                        Brush="#000000"
+                        Opacity="0.04"
+                        Radius="20"
+                        Offset="0,6" />
+                </Border.Shadow>
                 <VerticalStackLayout Spacing="16">
-                    <HorizontalStackLayout Spacing="10">
-                        <Label Text="🏷"
-                               FontSize="18"
-                               VerticalOptions="Center" />
-                        <Label Text="Nuevas Etiquetas"
-                               FontSize="17"
-                               FontAttributes="Bold"
-                               VerticalOptions="Center">
-                            <Label.TextColor>
-                                <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                            </Label.TextColor>
-                        </Label>
+
+                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                        <Border
+                            Padding="0"
+                            BackgroundColor="{AppThemeBinding Light=#ECFDF5, Dark=#064E3B}"
+                            HeightRequest="36"
+                            Stroke="Transparent"
+                            WidthRequest="36">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Label
+                                FontSize="16"
+                                HorizontalOptions="Center"
+                                Text="🏷"
+                                TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"
+                                VerticalOptions="Center" />
+                        </Border>
+                        <Label Style="{StaticResource SectionLabel}" Text="Nuevas Etiquetas" />
                     </HorizontalStackLayout>
 
-                    <Frame Padding="14,12"
-                           CornerRadius="12"
-                           HasShadow="False">
-                        <Frame.BackgroundColor>
-                            <AppThemeBinding Light="#F8F9FB" Dark="#252538" />
-                        </Frame.BackgroundColor>
-                        <Frame.BorderColor>
-                            <AppThemeBinding Light="#E0E4EA" Dark="#3A3A50" />
-                        </Frame.BorderColor>
-                        <Entry x:Name="EpcEntryNEW"
-                               Placeholder="EPC o número de etiqueta a reimprimir"
-                               Text="{Binding EpcToReprintN}"
-                               ReturnCommand="{Binding ReprintNCommand}"
-                               ReturnType="Send"
-                               FontSize="15"
-                               BackgroundColor="Transparent">
-                            <Entry.PlaceholderColor>
-                                <AppThemeBinding Light="#9CA3AF" Dark="#7A7A90" />
-                            </Entry.PlaceholderColor>
-                            <Entry.TextColor>
-                                <AppThemeBinding Light="#1A1A2E" Dark="#FFFFFF" />
-                            </Entry.TextColor>
-                        </Entry>
-                    </Frame>
+                    <!-- Input EPC Nueva -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Style="{StaticResource InputLabel}" Text="EPC o número de etiqueta" />
+                        <Border Style="{StaticResource InputContainer}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label
+                                    Grid.Column="0"
+                                    FontSize="16"
+                                    Text="📡"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"
+                                    VerticalOptions="Center" />
+                                <Entry
+                                    x:Name="EpcEntryNEW"
+                                    Grid.Column="1"
+                                    Placeholder="Escanear o escribir..."
+                                    ReturnCommand="{Binding ReprintNCommand}"
+                                    ReturnType="Send"
+                                    Style="{StaticResource FlatEntry}"
+                                    Text="{Binding EpcToReprintN}">
+                                    <Entry.PlaceholderColor>
+                                        <AppThemeBinding Light=#CBD5E1 Dark=#475569 />
+                                    </Entry.PlaceholderColor>
+                                    <Entry.TextColor>
+                                        <AppThemeBinding Light={StaticResource TextPrimaryLight} Dark={StaticResource TextPrimaryDark} />
+                                    </Entry.TextColor>
+                                </Entry>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
 
-                    <Button Style="{StaticResource PrimaryButton}"
-                            Text="Reimprimir etiqueta"
-                            Command="{Binding ReprintNCommand}"
-                            HeightRequest="48"
-                            FontSize="15"
-                            FontAttributes="Bold"
-                            CornerRadius="12">
+                    <Button
+                        Command="{Binding ReprintNCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Text="✓  Reimprimir etiqueta">
                         <Button.BackgroundColor>
-                            <AppThemeBinding Light="#059669" Dark="#10B981" />
+                            <AppThemeBinding Light={StaticResource SuccessLight} Dark={StaticResource SuccessDark} />
                         </Button.BackgroundColor>
                         <Button.TextColor>
-                            <AppThemeBinding Light="#FFFFFF" Dark="#FFFFFF" />
+                            <AppThemeBinding Light=#FFFFFF Dark=#FFFFFF />
                         </Button.TextColor>
                         <Button.Shadow>
-                            <Shadow Brush="#059669"
-                                    Opacity="0.3"
-                                    Radius="6"
-                                    Offset="0,3" />
+                            <Shadow
+                                Brush="{StaticResource SuccessLight}"
+                                Opacity="0.25"
+                                Radius="12"
+                                Offset="0,4" />
                         </Button.Shadow>
                     </Button>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
-            <!--  Espacio inferior  -->
-            <BoxView HeightRequest="20" IsVisible="False" />
+            <!-- Espacio inferior -->
+            <BoxView HeightRequest="20" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
-

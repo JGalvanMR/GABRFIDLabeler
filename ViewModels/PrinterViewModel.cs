@@ -853,7 +853,7 @@ public class PrinterViewModel : INotifyPropertyChanged
                 string query = @"
                 SELECT IdClaveInt 
                 FROM Tb_RFID_Catalogo 
-                WHERE IdStatus = 1 AND FechaCompra = 'MAR-2022'
+                WHERE IdStatus = 1 --AND FechaCompra = 'MAR-2022'
                 AND IdClaveInt NOT IN (SELECT IdClaveInt FROM Tb_RFID_DetInv)
                 AND IdClaveInt NOT IN (SELECT IdClaveInt FROM Tb_RFID_Det)
                 AND FechaUltimoMovimiento IS NULL
