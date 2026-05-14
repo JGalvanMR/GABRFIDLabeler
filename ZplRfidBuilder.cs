@@ -21,7 +21,7 @@ namespace GABRFIDLabeler
 ^LH0,0
 ^PON
 ^MNY
-~SD30
+~SD28
 
 ^RS,10,500,1,E^FS
 ^RZ00000000,P^FS

@@ -19,14 +19,7 @@ public partial class MainPage : ContentPage
             EpcEntry.SelectionLength = EpcEntry.Text?.Length ?? 0;
         };
 
-        // Suscribirse al evento para seleccionar el Entry
-        viewModel.ReprintNFinished += () =>
-        {
-            EpcEntryNEW.Focus();
-            EpcEntryNEW.CursorPosition = 0;
-            EpcEntryNEW.SelectionLength = EpcEntryNEW.Text?.Length ?? 0;
-        };
-
+        
 
     }
 

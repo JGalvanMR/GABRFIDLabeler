@@ -84,27 +84,27 @@ public class ZebraPrinterService
         for (int i = inicialLabel + 1; i <= finalLabel + 1; i++)
         {
             string increment = i.ToString("D6");
-            string text = $"080-M7623-{increment}";
-            string epc = $"7623{increment}";
+            string text = LabelHelper.GetIdClaveInt(i);
+            string epc = LabelHelper.GetIdClaveTag(i);
             //string date = "MAR-2025";
             string date = fechaCompra;
             //string name = $"Cajon {i}";
             string name = $"{i}";
 
-            //zplBuilder.AppendLine($@"^XA
-            //                    ~SD25
-            //                    ^PQ2
-            //                    ^FO30,50^BQN,2,7^FDLA,{text}^FS
-            //                    ^FO20,250^A0N,45,45,^FD{date}^FS
-            //                    ^RFW,H^FD{epc}^FS
-            //                    ^FO270,150^A0N,50,50,^FD{name}^FS
-            //                    ^FO445,20^GFA,357,357,7,N03FC,M01IF8,M0JFE,L01KF8,L03F801FC,L03EI07E,3JFC18I03F,7JF8007FC0F8KF001IF078FL03IF87CFL03E1FC3CFL03803E1EFO01F1EFN0F0F0EFM01FCF8!FM03FC78!FM07FE78!:FM07FE38!FM07FE78!FM03FC78!:FN0F0F0EFP0F1EFO01E1EFO03E3CFO07C3CFO03878FQ0F8FP01F,FP03E,FP03C,FP038,F700FE33F8,F7F0FF73FE,F7F8FF73FF,F738C07387,F618C073838C,F738FC73839C,F7F8FC7383BC,F7F0FC7383BC,F770C073873C,F678C073FF3C,F638C073FC3C,F618C031E03C,FO03C,:QF8,:7PF,3OFE,^FS
-            //                    ^XZ");
+            zplBuilder.AppendLine($@"^XA
+                                ~SD25
+                                ^PQ2
+                                ^FO30,50^BQN,3,8^FDLA,{text}^FS
+                                ^FO20,250^A0N,60,60,^FD{date}^FS
+                                ^RFW,H^FD{epc}^FS
+                                ^FO225,150^A0N,90,90,^FD{name}^FS
+                                ^FO445,30^GFA,357,357,7,N03FC,M01IF8,M0JFE,L01KF8,L03F801FC,L03EI07E,3JFC18I03F,7JF8007FC0F8KF001IF078FL03IF87CFL03E1FC3CFL03803E1EFO01F1EFN0F0F0EFM01FCF8!FM03FC78!FM07FE78!:FM07FE38!FM07FE78!FM03FC78!:FN0F0F0EFP0F1EFO01E1EFO03E3CFO07C3CFO03878FQ0F8FP01F,FP03E,FP03C,FP038,F700FE33F8,F7F0FF73FE,F7F8FF73FF,F738C07387,F618C073838C,F738FC73839C,F7F8FC7383BC,F7F0FC7383BC,F770C073873C,F678C073FF3C,F638C073FC3C,F618C031E03C,FO03C,:QF8,:7PF,3OFE,^FS
+                                ^XZ");
 
             //zplBuilder.AppendLine($@"^XA
             //                    ^PW735
             //                    ^LL192
-            //                    ~SD30
+            //                    ~SD28
             //                    ^PON
             //                    ^LH0,0
             //                    ^FO20,12^BQN,2,7^FDLA,{text}^FS
@@ -115,21 +115,21 @@ public class ZebraPrinterService
             //                    ^FO640,80^GFA,850,850,10,1FE3CN01JF8,:1FE1CN01JF8,1FE3CN01JF8,:0FC3CN01JF8,I03CN01JF8,8007CN01JF8,C00FCN01JF8,E03FCN01JF8,JFCN01JF8,E01FCN01JF8,8007CN01JF8,:I03CN01JF8,0FC3CN01JF8,1FE3CN01JF8,:::8FC7CN01JF8,S01JF8,:::JFCN01JF8,I03CN01JF8,:I038N01JF8,:FFC78N01JF8,FFE38N01JF8,::FFE18N01JF8,FF838N01JF8,I038N01JF8,I078N01JF8,I0F8N01JF8,JF8N01JF8,:1IF8N01JF8,:0IF8N01JF8,8IF8N01JF8,I038N01JF8,:::JF8N01JF8,J08N01JF8,S01JF8,::8FC7O01JF8,1FE38N01JF8,1FE3CN01JF8,:1FE3CN01JF,1FC38N01JF,0303O03JF,I06O03JF,:001E2N07JF,3IFEN07IFE,1JFN07IFE,1JFN0JFE,0JFM01JFC,0JF8L01JFC,07IF8L03JFC,03IFCL07JF8,01IFE3J01KF8,01IFE1EI03KF,00JF0FE01LF,007IF87NFE,003IFC3NFC,I0IFE1NFC,I07IF0NF8,I03IF83MF,J0IFC1LFE,J03FFE07KF8,K0IF81JFE,K03FFE07IF8,L07FFC07FC,M03FF8,^FS
             //                    ^XZ");
 
-            zplBuilder.AppendLine($@"^XA
-                                ~SD25
-                                ^PQ2
-                                ^FO20,12^BQN,2,7^FDLA,{text}^FS
-                                ^FO250,125^A0N,50,50^FD{date}^FS
-                                ^FO300,35^A0N,90,90^FD{name}^FS
-                                ^FO665,10^GFA,357,357,7,N03FC,M01IF8,M0JFE,L01KF8,L03F801FC,L03EI07E,3JFC18I03F,7JF8007FC0F8KF001IF078FL03IF87CFL03E1FC3CFL03803E1EFO01F1EFN0F0F0EFM01FCF8!FM03FC78!FM07FE78!:FM07FE38!FM07FE78!FM03FC78!:FN0F0F0EFP0F1EFO01E1EFO03E3CFO07C3CFO03878FQ0F8FP01F,FP03E,FP03C,FP038,F700FE33F8,F7F0FF73FE,F7F8FF73FF,F738C07387,F618C073838C,F738FC73839C,F7F8FC7383BC,F7F0FC7383BC,F770C073873C,F678C073FF3C,F638C073FC3C,F618C031E03C,FO03C,:QF8,:7PF,3OFE,^FS
-                                ^FO640,80^GFA,850,850,10,1FE3CN01JF8,:1FE1CN01JF8,1FE3CN01JF8,:0FC3CN01JF8,I03CN01JF8,8007CN01JF8,C00FCN01JF8,E03FCN01JF8,JFCN01JF8,E01FCN01JF8,8007CN01JF8,:I03CN01JF8,0FC3CN01JF8,1FE3CN01JF8,:::8FC7CN01JF8,S01JF8,:::JFCN01JF8,I03CN01JF8,:I038N01JF8,:FFC78N01JF8,FFE38N01JF8,::FFE18N01JF8,FF838N01JF8,I038N01JF8,I078N01JF8,I0F8N01JF8,JF8N01JF8,:1IF8N01JF8,:0IF8N01JF8,8IF8N01JF8,I038N01JF8,:::JF8N01JF8,J08N01JF8,S01JF8,::8FC7O01JF8,1FE38N01JF8,1FE3CN01JF8,:1FE3CN01JF,1FC38N01JF,0303O03JF,I06O03JF,:001E2N07JF,3IFEN07IFE,1JFN07IFE,1JFN0JFE,0JFM01JFC,0JF8L01JFC,07IF8L03JFC,03IFCL07JF8,01IFE3J01KF8,01IFE1EI03KF,00JF0FE01LF,007IF87NFE,003IFC3NFC,I0IFE1NFC,I07IF0NF8,I03IF83MF,J0IFC1LFE,J03FFE07KF8,K0IF81JFE,K03FFE07IF8,L07FFC07FC,M03FF8,^FS
-                                ^XZ");
+            //zplBuilder.AppendLine($@"^XA
+            //                    ~SD25
+            //                    ^PQ2
+            //                    ^FO20,12^BQN,2,7^FDLA,{text}^FS
+            //                    ^FO250,125^A0N,50,50^FD{date}^FS
+            //                    ^FO300,35^A0N,90,90^FD{name}^FS
+            //                    ^FO665,10^GFA,357,357,7,N03FC,M01IF8,M0JFE,L01KF8,L03F801FC,L03EI07E,3JFC18I03F,7JF8007FC0F8KF001IF078FL03IF87CFL03E1FC3CFL03803E1EFO01F1EFN0F0F0EFM01FCF8!FM03FC78!FM07FE78!:FM07FE38!FM07FE78!FM03FC78!:FN0F0F0EFP0F1EFO01E1EFO03E3CFO07C3CFO03878FQ0F8FP01F,FP03E,FP03C,FP038,F700FE33F8,F7F0FF73FE,F7F8FF73FF,F738C07387,F618C073838C,F738FC73839C,F7F8FC7383BC,F7F0FC7383BC,F770C073873C,F678C073FF3C,F638C073FC3C,F618C031E03C,FO03C,:QF8,:7PF,3OFE,^FS
+            //                    ^FO640,80^GFA,850,850,10,1FE3CN01JF8,:1FE1CN01JF8,1FE3CN01JF8,:0FC3CN01JF8,I03CN01JF8,8007CN01JF8,C00FCN01JF8,E03FCN01JF8,JFCN01JF8,E01FCN01JF8,8007CN01JF8,:I03CN01JF8,0FC3CN01JF8,1FE3CN01JF8,:::8FC7CN01JF8,S01JF8,:::JFCN01JF8,I03CN01JF8,:I038N01JF8,:FFC78N01JF8,FFE38N01JF8,::FFE18N01JF8,FF838N01JF8,I038N01JF8,I078N01JF8,I0F8N01JF8,JF8N01JF8,:1IF8N01JF8,:0IF8N01JF8,8IF8N01JF8,I038N01JF8,:::JF8N01JF8,J08N01JF8,S01JF8,::8FC7O01JF8,1FE38N01JF8,1FE3CN01JF8,:1FE3CN01JF,1FC38N01JF,0303O03JF,I06O03JF,:001E2N07JF,3IFEN07IFE,1JFN07IFE,1JFN0JFE,0JFM01JFC,0JF8L01JFC,07IF8L03JFC,03IFCL07JF8,01IFE3J01KF8,01IFE1EI03KF,00JF0FE01LF,007IF87NFE,003IFC3NFC,I0IFE1NFC,I07IF0NF8,I03IF83MF,J0IFC1LFE,J03FFE07KF8,K0IF81JFE,K03FFE07IF8,L07FFC07FC,M03FF8,^FS
+            //                    ^XZ");
         }
 
         return zplBuilder.ToString();
     }
 
-    private async Task BulkInsertLabels(string fechaCompra, int inicialLabel, int totalLabels)
+    private async Task BulkInsertLabelsLEGACY(string fechaCompra, int inicialLabel, int totalLabels)
     {
         if (string.IsNullOrEmpty(_connectionString)) return;
 
@@ -158,8 +158,8 @@ public class ZebraPrinterService
                     for (int i = inicialLabel + 1; i <= finalLabel + 1; i++)
                     {
                         string increment = i.ToString("D6");
-                        string text = $"080-M7623-{increment}";
-                        string epc = $"7623{increment}00000000000000";
+                        string text = LabelHelper.GetIdClaveInt(i);
+                        string epc = LabelHelper.GetIdClaveTag(i);
                         //string date = "MAR-2025";
                         string date = fechaCompra;
 
@@ -180,6 +180,54 @@ public class ZebraPrinterService
                 catch
                 {
                     // Si hay error, hacemos rollback
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+        }
+    }
+
+    private async Task BulkInsertLabels(string fechaCompra, int inicialLabel, int totalLabels)
+    {
+        if (string.IsNullOrEmpty(_connectionString)) return;
+
+        using (SqlConnection connection = new SqlConnection(_connectionString))
+        {
+            await connection.OpenAsync();
+            using (SqlTransaction transaction = connection.BeginTransaction())
+            {
+                try
+                {
+                    string query = @"
+                    IF NOT EXISTS (SELECT 1 FROM [dbo].[Tb_RFID_Catalogo] WHERE [IdClaveInt] = @IdClaveInt)
+                    BEGIN
+                        INSERT INTO [dbo].[Tb_RFID_Catalogo] 
+                        ([IdClaveTag], [IdClaveInt], [IdStatus], [FechaCompra]) 
+                        VALUES (@IdClaveTag, @IdClaveInt, @IdStatus, @FechaCompra)
+                    END";
+
+                    int finalLabel = inicialLabel + totalLabels - 1;
+
+                    for (int i = inicialLabel + 1; i <= finalLabel + 1; i++)
+                    {
+                        // Usar LabelHelper para generar ambos valores
+                        string text = LabelHelper.GetIdClaveInt(i);
+                        string epc = LabelHelper.GetIdClaveTag(i);
+                        string date = fechaCompra;
+
+                        using (SqlCommand command = new SqlCommand(query, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@IdClaveTag", epc);
+                            command.Parameters.AddWithValue("@IdClaveInt", text);
+                            command.Parameters.AddWithValue("@IdStatus", "1");
+                            command.Parameters.AddWithValue("@FechaCompra", date);
+                            await command.ExecuteNonQueryAsync();
+                        }
+                    }
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
                     await transaction.RollbackAsync();
                     throw;
                 }
@@ -388,7 +436,7 @@ public class ZebraPrinterService
                                 ^LH0,20
                                 ^PON
                                 ^MNY
-                                ~SD30
+                                ~SD28
                                 ^RS,10,500,1,E^FS
                                 ^RZ{defaultPassword},P^FS
                                 ^RFW,H,1,4,3^FD{password}^FS
@@ -432,7 +480,7 @@ public class ZebraPrinterService
 ^LH0,20
 ^PON
 ^MNY
-~SD30
+~SD28
 ^RS,10,500,1,E^FS
 ^RZ00000000,P^FS
 ^RFW,H,1,4,3^FDC3494D32^FS
@@ -472,8 +520,8 @@ public class ZebraPrinterService
         if (!int.TryParse(input, out int valor))
             throw new Exception("El valor BIG no es un número válido");
 
-        if (valor < 1 || valor > 10000)
-            throw new Exception("El valor BIG debe estar entre 1 y 10000");
+        if (valor < 1 || valor > 100000)
+            throw new Exception("El valor BIG debe estar entre 1 y 100000");
 
         string s = valor.ToString();
 
@@ -507,7 +555,7 @@ public class ZebraPrinterService
 ^LH0,0
 ^PON
 ^MNY
-~SD30
+~SD28
 
 ^RS,10,500,1,E^FS
 ^RZ00000000,P^FS
@@ -531,7 +579,7 @@ public class ZebraPrinterService
 ^LH0,20
 ^PON
 ^MNY
-~SD30
+~SD28
 
 ^RS,10,500,1,E^FS
 ^RZ00000000,P^FS

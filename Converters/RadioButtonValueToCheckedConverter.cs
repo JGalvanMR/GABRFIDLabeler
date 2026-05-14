@@ -10,19 +10,18 @@ namespace GABRFIDLabeler.Converters
         {
             if (value == null || parameter == null)
                 return false;
-
-            // Comparamos el valor del ViewModel con el parámetro del RadioButton
-            return value.ToString() == parameter.ToString();
+            return value.ToString().Equals(parameter.ToString(), StringComparison.OrdinalIgnoreCase);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            // Si el RadioButton se marca (value es true), devolvemos el parámetro al ViewModel
-            if (value is bool isChecked && isChecked)
-                return parameter?.ToString();
-
-            return string.Empty;
+            if (value is bool isChecked && isChecked && parameter is string paramStr)
+            {
+                if (targetType.IsEnum)
+                    return Enum.Parse(targetType, paramStr);
+                return paramStr;
+            }
+            return BindableProperty.UnsetValue;
         }
     }
 }
-

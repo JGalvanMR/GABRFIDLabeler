@@ -29,6 +29,8 @@ public class PrinterViewModel : INotifyPropertyChanged
     public PrinterViewModel(string dbConnectionString)
     {
         _printerService = new ZebraPrinterService(dbConnectionString);
+        EmpresaSeleccionada = Empresa.GAB; // Valor por defecto
+        LabelHelper.EmpresaActual = Empresa.GAB;
     }
 
     private string _selectedMode = "Impresion";
@@ -144,6 +146,8 @@ public class PrinterViewModel : INotifyPropertyChanged
         await Application.Current.MainPage.DisplayAlert("Impresión", "Etiqueta impresa", "OK");
     });
 
+
+
     public ICommand PrintBatchCommand => new Command(async () =>
     {
         if (LabelsToPrint <= 0)
@@ -152,9 +156,26 @@ public class PrinterViewModel : INotifyPropertyChanged
             return;
         }
 
+        // Validación específica para AGUILARES
+        if (EmpresaSeleccionada == Empresa.AGUILARES)
+        {
+            if (LabelPrint < 100000)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error",
+                    "Para AGUILARES el número de inicio debe ser ≥ 100000", "OK");
+                return;
+            }
+            int final = LabelPrint + LabelsToPrint - 1;
+            if (final < 100000)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error",
+                    "Todos los números del lote deben ser ≥ 100000 para AGUILARES", "OK");
+                return;
+            }
+        }
+
         bool confirm = await Application.Current.MainPage.DisplayAlert("Confirmar",
-            $"¿Está seguro que desea imprimir {LabelsToPrint} etiquetas?",
-            "Sí", "No");
+            $"¿Está seguro que desea imprimir {LabelsToPrint} etiquetas?", "Sí", "No");
 
         if (confirm)
         {
@@ -200,10 +221,12 @@ public class PrinterViewModel : INotifyPropertyChanged
 
                 for (int i = 1; i <= _labelQuantity; i++)
                 {
-                    string text = $"080-M7623-{i:D6}";
-                    string epc = $"7623{i:D6}";
-                    string date = "MAR 2025";
-                    string formattedDate = "MAR-2025";
+                    //string text = $"080-M7623-{i:D6}";
+                    //string epc = $"7623{i:D6}";
+                    string text = LabelHelper.GetIdClaveInt(i);
+                    string epc = LabelHelper.GetIdClaveTag(i);
+                    string date = "MAY 2026";
+                    string formattedDate = "MAY-2026";
                     //string name = $"Cajon {i}";
                     string name = $"{i}";
 
@@ -440,7 +463,7 @@ public class PrinterViewModel : INotifyPropertyChanged
         }
     }
 
-    private async Task ReprintLabelAsync()
+    private async Task ReprintLabelAsyncV1()
     {
         // 1. Validación inicial de entrada vacía
         if (string.IsNullOrWhiteSpace(EpcToReprint))
@@ -576,6 +599,122 @@ public class PrinterViewModel : INotifyPropertyChanged
         catch (Exception ex)
         {
             await Application.Current.MainPage.DisplayAlert("Error", $"Ocurrió un error en el proceso: {ex.Message}", "OK");
+        }
+    }
+
+    private async Task ReprintLabelAsync()
+    {
+        if (string.IsNullOrWhiteSpace(EpcToReprint))
+        {
+            await Application.Current.MainPage.DisplayAlert("Atención", "Ingrese el EPC o número de etiqueta.", "OK");
+            return;
+        }
+
+        bool forzarReimpresion = EpcToReprint.Contains("¬");
+        string cadenaLimpia = EpcToReprint.Replace("¬", "").Trim();
+
+        try
+        {
+            using SqlConnection connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            if (!int.TryParse(cadenaLimpia, out int numero))
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", "El valor ingresado no es un número válido.", "OK");
+                ReprintFinished?.Invoke();
+                return;
+            }
+
+            // Prepara los dos posibles formatos
+            string formattedLabelGAB = $"080-M7623-{numero:D6}";
+            string formattedLabelAguilares = $"02-M7275-{numero}";
+            string formattedLabel = null;
+
+            // Intenta buscar según el formato actual primero
+            string query = "SELECT IdClaveInt, FechaCompra, IdClaveTag FROM Tb_RFID_Catalogo WHERE IdClaveInt = @EPC";
+            using SqlCommand cmd = new SqlCommand(query, connection);
+
+            if (EmpresaSeleccionada == Empresa.GAB)
+                formattedLabel = formattedLabelGAB;
+            else
+                formattedLabel = formattedLabelAguilares;
+
+            cmd.Parameters.AddWithValue("@EPC", formattedLabel);
+            using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+            if (!reader.HasRows)
+            {
+                // Si no se encuentra, probar con el otro formato
+                reader.Close();
+                cmd.Parameters["@EPC"].Value = (EmpresaSeleccionada == Empresa.GAB) ? formattedLabelAguilares : formattedLabelGAB;
+                using SqlDataReader reader2 = await cmd.ExecuteReaderAsync();
+                if (!reader2.HasRows)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error", "No se encontró información para ese EPC.", "OK");
+                    ReprintFinished?.Invoke();
+                    return;
+                }
+                await reader2.ReadAsync();
+                formattedLabel = reader2["IdClaveInt"].ToString();
+                string date = reader2["FechaCompra"].ToString();
+                string name = reader2["IdClaveTag"]?.ToString() ?? "";
+                // Extraer el número real (puede venir de cualquier empresa)
+                if (!LabelHelper.TryParseClaveInt(formattedLabel, out int realNumber, out _))
+                    realNumber = numero;
+                string epc = !string.IsNullOrWhiteSpace(name) ? name : LabelHelper.GetIdClaveTag(realNumber);
+                reader2.Close();
+
+                // Verificar bloqueo de tanda
+                if (_reprintedLabels.Contains(formattedLabel) && !forzarReimpresion)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Atención", $"La etiqueta {formattedLabel} ya fue reimpresa en esta tanda.", "OK");
+                    ReprintFinished?.Invoke();
+                    return;
+                }
+
+                // Impresión doble
+                await _printerService.PrintAndWriteRfidAsync(formattedLabel, epc, date, $"{realNumber}");
+                await Task.Delay(250);
+                await _printerService.PrintAndWriteRfidAsync(formattedLabel, epc, date, $"{realNumber}");
+
+                if (!_reprintedLabels.Contains(formattedLabel))
+                    _reprintedLabels.Add(formattedLabel);
+
+                await Application.Current.MainPage.DisplayAlert("Éxito", $"Etiqueta {formattedLabel} reimpresa correctamente.", "OK");
+                ReprintFinished?.Invoke();
+                return;
+            }
+
+            // Si encontramos con el primer intento
+            await reader.ReadAsync();
+            string labelText = reader["IdClaveInt"].ToString();
+            string dateFound = reader["FechaCompra"].ToString();
+            string nameFound = reader["IdClaveTag"]?.ToString() ?? "";
+            reader.Close();
+
+            // Validar bloqueo de tanda
+            if (_reprintedLabels.Contains(labelText) && !forzarReimpresion)
+            {
+                await Application.Current.MainPage.DisplayAlert("Atención", $"La etiqueta {labelText} ya fue reimpresa en esta tanda.", "OK");
+                ReprintFinished?.Invoke();
+                return;
+            }
+
+            string epcFinal = !string.IsNullOrWhiteSpace(nameFound) ? nameFound : LabelHelper.GetIdClaveTag(numero);
+
+            await _printerService.PrintAndWriteRfidAsync(labelText, epcFinal, dateFound, $"{numero}");
+            await Task.Delay(250);
+            await _printerService.PrintAndWriteRfidAsync(labelText, epcFinal, dateFound, $"{numero}");
+
+            if (!_reprintedLabels.Contains(labelText))
+                _reprintedLabels.Add(labelText);
+
+            await Application.Current.MainPage.DisplayAlert("Éxito", $"Etiqueta {labelText} reimpresa correctamente.", "OK");
+            ReprintFinished?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", $"Ocurrió un error: {ex.Message}", "OK");
         }
     }
 
@@ -894,5 +1033,62 @@ public class PrinterViewModel : INotifyPropertyChanged
     {
         get => _totalReimpresosTanda;
         set { _totalReimpresosTanda = value; OnPropertyChanged(); }
+    }
+
+    private Empresa _empresaSeleccionada = Empresa.GAB;
+    public Empresa EmpresaSeleccionada
+    {
+        get => _empresaSeleccionada;
+        set
+        {
+            if (_empresaSeleccionada != value)
+            {
+                _empresaSeleccionada = value;
+                LabelHelper.EmpresaActual = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsGAB));
+                OnPropertyChanged(nameof(IsAguilares));
+                if (value == Empresa.AGUILARES && LabelPrint < 100000)
+                    LabelPrint = 100000;
+            }
+        }
+    }
+
+    public bool IsGAB => EmpresaSeleccionada == Empresa.GAB;
+    public bool IsAguilares => EmpresaSeleccionada == Empresa.AGUILARES;
+
+    private bool _isGAB = true;
+    private bool _isAguilares = false;
+
+    public bool IsGABChecked
+    {
+        get => _isGAB;
+        set
+        {
+            if (value)
+            {
+                _isGAB = true;
+                _isAguilares = false;
+                EmpresaSeleccionada = Empresa.GAB;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsAguilaresChecked));
+            }
+        }
+    }
+
+    public bool IsAguilaresChecked
+    {
+        get => _isAguilares;
+        set
+        {
+            if (value)
+            {
+                _isAguilares = true;
+                _isGAB = false;
+                EmpresaSeleccionada = Empresa.AGUILARES;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsGABChecked));
+            }
+        }
     }
 }
