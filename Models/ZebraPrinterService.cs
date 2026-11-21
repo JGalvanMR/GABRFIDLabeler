@@ -23,8 +23,13 @@ public class ZebraPrinterService
         _connectionString = dbConnectionString;
     }
 
+    public bool IsConnected => _printer != null && _connection != null && _connection.Connected;
+
     public async Task<bool> ConnectAsync(string printerIp)
     {
+        try { _connection?.Close(); } catch { }
+        _printer = null;
+
         _connection = new TcpConnection(printerIp, TcpConnection.DEFAULT_ZPL_TCP_PORT);
         try
         {
@@ -540,38 +545,15 @@ public class ZebraPrinterService
 
     public async Task PrintRfidAutoAsync(string text, string epc, string date, string name)
     {
-        if (_printer == null) return;
+        if (!IsConnected)
+            throw new InvalidOperationException("La impresora no está conectada.");
+
+        if (string.IsNullOrWhiteSpace(epc) || !EsEpcValido(epc))
+            throw new ArgumentException($"EPC inválido '{epc}': debe tener 24 caracteres hexadecimales (0-9, A-F).");
 
         try
         {
-            EsEpcValido(epc);
-
-            var (big1, big2) = ExtraerBigDesdeNumeroDividido(name);
             var (mes, anio) = ExtraerMesAnio(date);
-
-            string zpl = $@"^XA
-^PW736
-^LL228
-^LH0,0
-^PON
-^MNY
-~SD28
-
-^RS,10,500,1,E^FS
-^RZ00000000,P^FS
-^RFW,H,1,4,3^FDC3494D32^FS
-^RFW,H^FD{epc}^FS
-^RLE,P^FS
-
-^FO20,13^BQN,2,7^FDLA,{text}^FS
-^FO200,50^A0N,90,85^FD{big1}^FS
-^FO300,50^A0N,90,85^FD{big2}^FS
-^FO500,50^A0N,50,50^FD{mes}^FS
-^FO500,100^A0N,50,50^FD{anio}^FS
-
-^FO660,13^GFA,357,357,7,N03FC,M01IF8,M0JFE,L01KF8,L03F801FC,L03EI07E,3JFC18I03F,7JF8007FC0F8KF001IF078FL03IF87CFL03E1FC3CFL03803E1EFO01F1EFN0F0F0EFM01FCF8!FM03FC78!FM07FE78!:FM07FE38!FM07FE78!FM03FC78!:FN0F0F0EFP0F1EFO01E1EFO03E3CFO07C3CFO03878FQ0F8FP01F,FP03E,FP03C,FP038,F700FE33F8,F7F0FF73FE,F7F8FF73FF,F738C07387,F618C073838C,F738FC73839C,F7F8FC7383BC,F7F0FC7383BC,F770C073873C,F678C073FF3C,F638C073FC3C,F618C031E03C,FO03C,:QF8,:7PF,3OFE,^FS
-^FO640,90^GFA,850,850,10,1FE3CN01JF8,:1FE1CN01JF8,1FE3CN01JF8,:0FC3CN01JF8,I03CN01JF8,8007CN01JF8,C00FCN01JF8,E03FCN01JF8,JFCN01JF8,E01FCN01JF8,8007CN01JF8,:I03CN01JF8,0FC3CN01JF8,1FE3CN01JF8,:::8FC7CN01JF8,S01JF8,:::JFCN01JF8,I03CN01JF8,:I038N01JF8,:FFC78N01JF8,FFE38N01JF8,::FFE18N01JF8,FF838N01JF8,I038N01JF8,I078N01JF8,I0F8N01JF8,JF8N01JF8,:1IF8N01JF8,:0IF8N01JF8,8IF8N01JF8,I038N01JF8,:::JF8N01JF8,J08N01JF8,S01JF8,::8FC7O01JF8,1FE38N01JF8,1FE3CN01JF8,:1FE3CN01JF,1FC38N01JF,0303O03JF,I06O03JF,:001E2N07JF,3IFEN07IFE,1JFN07IFE,1JFN0JFE,0JFM01JFC,0JF8L01JFC,07IF8L03JFC,03IFCL07JF8,01IFE3J01KF8,01IFE1EI03KF,00JF0FE01LF,007IF87NFE,003IFC3NFC,I0IFE1NFC,I07IF0NF8,I03IF83MF,J0IFC1LFE,J03FFE07KF8,K0IF81JFE,K03FFE07IF8,L07FFC07FC,M03FF8,^FS
-^XZ";
 
             string zpl2 = $@"^XA
 ^PW736
@@ -601,6 +583,7 @@ public class ZebraPrinterService
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
+            throw;
         }
     }
 

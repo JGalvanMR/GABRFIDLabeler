@@ -787,123 +787,214 @@ public class PrinterViewModel : INotifyPropertyChanged
     // Agregar este campo en tu clase
     private readonly HashSet<string> _reprintedNewLabels = new HashSet<string>();
 
+    // Evita doble ejecución (Enter del escáner + clic en botón, o clics repetidos)
+    private bool _isReprintNBusy;
+
+    // Si la etiqueta tuvo lectura/movimiento dentro de este margen se considera en circulación
+    // (probablemente ya es la etiqueta nueva) y se bloquea la reimpresión salvo forzado confirmado.
+    private const int DIAS_ACTIVIDAD_RECIENTE = 30;
+
     private async Task ReprintNewLabelAsync()
     {
-        // 1. Validación inicial de entrada vacía
-        if (string.IsNullOrWhiteSpace(EpcToReprintN))
-        {
-            await Application.Current.MainPage.DisplayAlert("Atención",
-                "Ingrese el EPC o número de etiqueta a reimprimir.", "OK");
-            return;
-        }
+        if (_isReprintNBusy) return;
+        _isReprintNBusy = true;
 
-        // 2. Detectar el carácter especial '¬' y limpiar la cadena
-        // Guardamos si existe el símbolo y luego lo removemos para que int.TryParse no falle
-        bool forzarReimpresion = EpcToReprintN.Contains("¬");
-        string cadenaLimpia = EpcToReprintN.Replace("¬", "").Trim();
-
+        bool exito = false;
         try
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                // 3. Validar que lo que quedó sea un número válido
-                if (!int.TryParse(cadenaLimpia, out int numero))
-                {
-                    await Application.Current.MainPage.DisplayAlert("Error",
-                        "El valor ingresado no es un número válido.", "OK");
-                    ReprintNFinished?.Invoke();
-                    return;
-                }
-
-                // Formatear la etiqueta para la consulta
-                string formattedLabel = $"080-M7623-{numero:D6}";
-
-                // 4. Verificar si ya se reimprimió en esta tanda (Memoria RAM)
-                // Si 'forzarReimpresion' es true, ignoramos este bloqueo
-                if (_reprintedNewLabels.Contains(formattedLabel) && !forzarReimpresion)
-                {
-                    await Application.Current.MainPage.DisplayAlert("Atención",
-                        $"La etiqueta {formattedLabel} ya fue reimpresa en esta tanda.", "OK");
-                    ReprintNFinished?.Invoke();
-                    return;
-                }
-
-                string query = @"SELECT IdClaveInt, FechaCompra, IdClaveTag, EtiquetaNueva 
-                             FROM Tb_RFID_Catalogo 
-                             WHERE IdClaveInt = @EPC";
-
-                using SqlCommand cmd = new SqlCommand(query, connection);
-                cmd.Parameters.AddWithValue("@EPC", formattedLabel);
-
-                using SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                if (!reader.HasRows)
-                {
-                    await Application.Current.MainPage.DisplayAlert("Error",
-                        "No se encontró información para ese EPC.", "OK");
-                    ReprintNFinished?.Invoke();
-                    return;
-                }
-
-                await reader.ReadAsync();
-
-                // 5. Validar si ya fue reimpresa en la Base de Datos
-                bool yaReimpresaBD = reader["EtiquetaNueva"] != DBNull.Value && Convert.ToBoolean(reader["EtiquetaNueva"]);
-
-                // Si ya está marcada en BD y NO traemos el símbolo de forzado, bloqueamos
-                if (yaReimpresaBD && !forzarReimpresion)
-                {
-                    await Application.Current.MainPage.DisplayAlert("Atención",
-                        $"La etiqueta {cadenaLimpia} ya fue reimpresa como nueva en el sistema.", "OK");
-                    ReprintNFinished?.Invoke();
-                    return;
-                }
-
-                // 6. Preparar datos para la impresión
-                string labelText = reader["IdClaveInt"].ToString();    // "080-M7623-000001"
-                string date = reader["FechaCompra"].ToString();         // "MAR-2025"
-                string name = reader["IdClaveTag"]?.ToString() ?? "";   // "7623000001"
-
-                // Reconstruir EPC para el chip RFID
-                string epc = !string.IsNullOrWhiteSpace(name)
-                             ? name
-                             : $"7623{numero:D6}";
-
-                reader.Close(); // Cerramos el reader antes de proceder con otras tareas
-
-                // 7. Proceso de Impresión (se hace doble por seguridad física)
-                for (int i = 0; i < 2; i++)
-                {
-                    await _printerService.PrintRfidAutoAsync(labelText, epc, date, $"{numero}");
-                    await Task.Delay(200);
-                }
-
-                // 8. Actualizar Base de Datos (solo si no es un forzado, o según tu lógica de negocio)
-                // Normalmente, si es forzado, ya está marcada, así que no hace falta volver a marcar.
-                if (!forzarReimpresion)
-                {
-                    await MarcarEtiquetaComoReimpresaAsync(epc);
-                }
-
-                // Registrar en la lista de la tanda actual
-                if (!_reprintedNewLabels.Contains(labelText))
-                {
-                    _reprintedNewLabels.Add(labelText);
-                }
-
-                await Application.Current.MainPage.DisplayAlert("Éxito",
-                    $"Etiqueta {labelText} reimpresa correctamente.", "OK");
-
-                ReprintNFinished?.Invoke();
-            }
+            exito = await ProcesarReimpresionNuevaAsync();
         }
         catch (Exception ex)
         {
             await Application.Current.MainPage.DisplayAlert("Error",
                 $"Ocurrió un error inesperado: {ex.Message}", "OK");
         }
+        finally
+        {
+            _isReprintNBusy = false;
+            if (exito)
+                EpcToReprintN = string.Empty;   // listo para el siguiente escaneo
+            ReprintNFinished?.Invoke();         // devuelve el foco al Entry
+        }
+    }
+
+    /// <summary>Devuelve true solo si la etiqueta se imprimió correctamente.</summary>
+    private async Task<bool> ProcesarReimpresionNuevaAsync()
+    {
+        // 1. Entrada vacía
+        if (string.IsNullOrWhiteSpace(EpcToReprintN))
+        {
+            await Application.Current.MainPage.DisplayAlert("Atención",
+                "Ingrese el EPC o número de etiqueta a reimprimir.", "OK");
+            return false;
+        }
+
+        // 2. Símbolo '¬' = reimpresión forzada; se limpia para poder interpretar el número
+        bool forzarReimpresion = EpcToReprintN.Contains("¬");
+        string cadenaLimpia = EpcToReprintN.Replace("¬", "").Trim();
+
+        // 3. Número válido y mayor a cero (NumberStyles.None rechaza signos y separadores)
+        if (!int.TryParse(cadenaLimpia, System.Globalization.NumberStyles.None,
+                System.Globalization.CultureInfo.InvariantCulture, out int numero) || numero <= 0)
+        {
+            await Application.Current.MainPage.DisplayAlert("Error",
+                "El valor ingresado no es un número válido (debe ser un entero mayor a 0).", "OK");
+            return false;
+        }
+
+        // 4. Regla de numeración por empresa
+        if (EmpresaSeleccionada == Empresa.AGUILARES && numero < LabelHelper.AGUILARES_MIN_NUMBER)
+        {
+            await Application.Current.MainPage.DisplayAlert("Error",
+                $"Para AGUILARES el número debe ser ≥ {LabelHelper.AGUILARES_MIN_NUMBER}.", "OK");
+            return false;
+        }
+
+        // 5. La impresora debe estar conectada antes de tocar la BD
+        if (!_printerService.IsConnected)
+        {
+            await Application.Current.MainPage.DisplayAlert("Impresora no conectada",
+                "Conecte la impresora antes de reimprimir.", "OK");
+            return false;
+        }
+
+        // 6. Formato de etiqueta según la empresa seleccionada (GAB / AGUILARES)
+        string formattedLabel = LabelHelper.GetIdClaveInt(numero);
+
+        // 7. Bloqueo de tanda (memoria); el forzado lo omite
+        if (_reprintedNewLabels.Contains(formattedLabel) && !forzarReimpresion)
+        {
+            await Application.Current.MainPage.DisplayAlert("Atención",
+                $"La etiqueta {formattedLabel} ya fue reimpresa en esta tanda.", "OK");
+            return false;
+        }
+
+        // 8. Consulta en BD (catálogo + última actividad registrada)
+        string labelText, date, tag;
+        bool yaReimpresaBD;
+        DateTime? ultimaActividad;
+        string tipoMov;
+
+        using (SqlConnection connection = new SqlConnection(_connectionString))
+        {
+            await connection.OpenAsync();
+
+            DateTime? fechaUltimoMovCatalogo;
+            using (SqlCommand cmd = new SqlCommand(
+                @"SELECT IdClaveInt, FechaCompra, IdClaveTag, EtiquetaNueva, FechaUltimoMovimiento
+                  FROM Tb_RFID_Catalogo
+                  WHERE IdClaveInt = @EPC", connection))
+            {
+                cmd.Parameters.AddWithValue("@EPC", formattedLabel);
+
+                using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                if (!await reader.ReadAsync())
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error",
+                        $"No se encontró información para la etiqueta {formattedLabel}.", "OK");
+                    return false;
+                }
+
+                yaReimpresaBD = reader["EtiquetaNueva"] != DBNull.Value && Convert.ToBoolean(reader["EtiquetaNueva"]);
+                labelText = reader["IdClaveInt"].ToString();
+                date = reader["FechaCompra"]?.ToString() ?? "";
+                tag = reader["IdClaveTag"]?.ToString() ?? "";
+                fechaUltimoMovCatalogo = reader["FechaUltimoMovimiento"] != DBNull.Value
+                    ? Convert.ToDateTime(reader["FechaUltimoMovimiento"])
+                    : null;
+            }
+
+            // Último movimiento operativo (Tb_RFID_Det / Tb_RFID_Mstr)
+            var audit = await GetLastMovementAsync(formattedLabel, connection);
+            tipoMov = audit?.TipoMov;
+
+            // Se toma la actividad más reciente entre ambas fuentes
+            ultimaActividad = fechaUltimoMovCatalogo;
+            if (audit?.FechaMov != null && (ultimaActividad == null || audit.FechaMov > ultimaActividad))
+                ultimaActividad = audit.FechaMov;
+        }
+
+        // 9. Bloqueo por BD; el forzado lo omite
+        if (yaReimpresaBD && !forzarReimpresion)
+        {
+            await Application.Current.MainPage.DisplayAlert("Atención",
+                $"La etiqueta {labelText} ya fue reimpresa como nueva en el sistema.", "OK");
+            return false;
+        }
+
+        // 9b. Actividad reciente: la etiqueta fue leída/movida hace poco, es probable que ya sea la nueva
+        if (ultimaActividad.HasValue)
+        {
+            string tiempo = new LabelAuditInfo { FechaMov = ultimaActividad }.ObtenerTiempoTranscurrido();
+            string nombreMov = tipoMov == "E" ? "ENTRADA" : (tipoMov == "S" ? "SALIDA" : null);
+            string detalle = $"Última actividad: {ultimaActividad:dd/MM/yyyy HH:mm} (hace {tiempo})" +
+                             (nombreMov != null ? $"\nÚltimo movimiento: {nombreMov}" : "");
+
+            bool reciente = (DateTime.Now - ultimaActividad.Value).TotalDays <= DIAS_ACTIVIDAD_RECIENTE;
+
+            if (reciente && !forzarReimpresion)
+            {
+                await Application.Current.MainPage.DisplayAlert("Etiqueta en circulación",
+                    $"La etiqueta {labelText} tuvo actividad reciente y probablemente ya es la etiqueta nueva.\n\n" +
+                    $"{detalle}\n\nNo se reimprimió. Si realmente debe reimprimirla, use el modo forzado (¬).", "OK");
+                return false;
+            }
+
+            if (reciente || !forzarReimpresion)
+            {
+                // Con forzado + actividad reciente se pide confirmación explícita (el forzado no la omite)
+                bool continuar = await Application.Current.MainPage.DisplayAlert(
+                    reciente ? "Confirmación crítica" : "Confirmación de reimpresión",
+                    $"La etiqueta {labelText} ya tiene actividad operativa.\n\n{detalle}\n\n¿Desea reimprimirla de todos modos?",
+                    "SÍ, REIMPRIMIR", "CANCELAR");
+
+                if (!continuar) return false;
+            }
+        }
+
+        // 10. EPC de 24 caracteres hexadecimales (si la BD no lo trae, se reconstruye con LabelHelper)
+        string epc = string.IsNullOrWhiteSpace(tag)
+            ? LabelHelper.GetIdClaveTag(numero)
+            : tag.Trim().ToUpperInvariant();
+
+        // 11. Impresión doble; cualquier error (EPC inválido, impresora, etc.) se reporta y NO se marca nada
+        try
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                await _printerService.PrintRfidAutoAsync(labelText, epc, date, $"{numero}");
+                await Task.Delay(200);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Application.Current.MainPage.DisplayAlert("Error de impresión",
+                $"No se pudo imprimir la etiqueta {labelText}: {ex.Message}\n\nLa etiqueta NO fue marcada como reimpresa.", "OK");
+            return false;
+        }
+
+        // 12. Ya impresa: se registra en la tanda antes de tocar la BD
+        _reprintedNewLabels.Add(labelText);
+
+        // 13. Marcar en BD (no aplica en forzado, ya está marcada)
+        if (!forzarReimpresion)
+        {
+            try
+            {
+                await MarcarEtiquetaComoReimpresaAsync(epc);
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Advertencia",
+                    $"La etiqueta {labelText} se imprimió, pero no se pudo marcar en el sistema: {ex.Message}\n\nAvise a sistemas; no la reimprima de nuevo.", "OK");
+                return true;
+            }
+        }
+
+        await Application.Current.MainPage.DisplayAlert("Éxito",
+            $"Etiqueta {labelText} reimpresa correctamente.", "OK");
+        return true;
     }
 
     public async Task MarcarEtiquetaComoReimpresaAsync(string epc)
