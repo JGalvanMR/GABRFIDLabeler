@@ -32,12 +32,11 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Maui" Version="12.1.0"/>
-		<PackageReference Include="System.Formats.Nrbf" Version="9.0.7"/>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.90"/>
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.90"/>
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7"/>
-		<PackageReference Include="Zebra.Printer.SDK" Version="4.0.3428"/>
+		<PackageReference Include="CommunityToolkit.Maui" Version="12.1.0" />
+		<PackageReference Include="System.Formats.Nrbf" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.90" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.90" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
@@ -45,9 +44,6 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.100" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
-	</ItemGroup>
-
-	<ItemGroup Condition="$(TargetFramework.Contains('-windows'))">
 		<PackageReference Include="Zebra.Printer.SDK" Version="4.0.3435" />
 	</ItemGroup>
 
