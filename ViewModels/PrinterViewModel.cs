@@ -790,10 +790,6 @@ public class PrinterViewModel : INotifyPropertyChanged
     // Evita doble ejecución (Enter del escáner + clic en botón, o clics repetidos)
     private bool _isReprintNBusy;
 
-    // Si la etiqueta tuvo lectura/movimiento dentro de este margen se considera en circulación
-    // (probablemente ya es la etiqueta nueva) y se bloquea la reimpresión salvo forzado confirmado.
-    private const int DIAS_ACTIVIDAD_RECIENTE = 30;
-
     private async Task ReprintNewLabelAsync()
     {
         if (_isReprintNBusy) return;
@@ -873,6 +869,7 @@ public class PrinterViewModel : INotifyPropertyChanged
         string labelText, date, tag;
         bool yaReimpresaBD;
         DateTime? ultimaActividad;
+        DateTime? fechaReimpresion;
         string tipoMov;
 
         using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -881,7 +878,7 @@ public class PrinterViewModel : INotifyPropertyChanged
 
             DateTime? fechaUltimoMovCatalogo;
             using (SqlCommand cmd = new SqlCommand(
-                @"SELECT IdClaveInt, FechaCompra, IdClaveTag, EtiquetaNueva, FechaUltimoMovimiento
+                @"SELECT IdClaveInt, FechaCompra, IdClaveTag, EtiquetaNueva, FechaUltimoMovimiento, FechaReimpresion
                   FROM Tb_RFID_Catalogo
                   WHERE IdClaveInt = @EPC", connection))
             {
@@ -903,6 +900,9 @@ public class PrinterViewModel : INotifyPropertyChanged
                 fechaUltimoMovCatalogo = reader["FechaUltimoMovimiento"] != DBNull.Value
                     ? Convert.ToDateTime(reader["FechaUltimoMovimiento"])
                     : null;
+                fechaReimpresion = reader["FechaReimpresion"] != DBNull.Value
+                    ? Convert.ToDateTime(reader["FechaReimpresion"])
+                    : null;
             }
 
             // Último movimiento operativo (Tb_RFID_Det / Tb_RFID_Mstr)
@@ -923,7 +923,7 @@ public class PrinterViewModel : INotifyPropertyChanged
             return false;
         }
 
-        // 9b. Actividad reciente: la etiqueta fue leída/movida hace poco, es probable que ya sea la nueva
+        // 9b. Actividad registrada: se muestra como dato y se pide confirmación (no bloquea)
         if (ultimaActividad.HasValue)
         {
             string tiempo = new LabelAuditInfo { FechaMov = ultimaActividad }.ObtenerTiempoTranscurrido();
@@ -931,21 +931,29 @@ public class PrinterViewModel : INotifyPropertyChanged
             string detalle = $"Última actividad: {ultimaActividad:dd/MM/yyyy HH:mm} (hace {tiempo})" +
                              (nombreMov != null ? $"\nÚltimo movimiento: {nombreMov}" : "");
 
-            bool reciente = (DateTime.Now - ultimaActividad.Value).TotalDays <= DIAS_ACTIVIDAD_RECIENTE;
-
-            if (reciente && !forzarReimpresion)
+            // Solo hechos registrados: la fecha de reimpresión se guarda desde que existe FechaReimpresion
+            if (fechaReimpresion.HasValue)
             {
-                await Application.Current.MainPage.DisplayAlert("Etiqueta en circulación",
-                    $"La etiqueta {labelText} tuvo actividad reciente y probablemente ya es la etiqueta nueva.\n\n" +
-                    $"{detalle}\n\nNo se reimprimió. Si realmente debe reimprimirla, use el modo forzado (¬).", "OK");
-                return false;
+                detalle += $"\nReimpresa el: {fechaReimpresion:dd/MM/yyyy HH:mm}\n" +
+                           (ultimaActividad.Value > fechaReimpresion.Value
+                               ? "Hay actividad registrada POSTERIOR a la reimpresión."
+                               : "La actividad registrada es anterior a la reimpresión.");
+            }
+            else if (yaReimpresaBD)
+            {
+                detalle += "\nMarcada como reimpresa, sin fecha registrada (reimpresión anterior a este control).";
+            }
+            else
+            {
+                // EtiquetaNueva = 0: aún no existe etiqueta nueva, la actividad es de la etiqueta original
+                detalle += "\nAún no se reimprime como etiqueta nueva; la actividad corresponde a la etiqueta original.";
             }
 
-            if (reciente || !forzarReimpresion)
+            // Sin bloqueo por antigüedad: el bloqueo real es EtiquetaNueva = 1 (paso 9). Aquí solo se confirma.
+            if (!forzarReimpresion)
             {
-                // Con forzado + actividad reciente se pide confirmación explícita (el forzado no la omite)
                 bool continuar = await Application.Current.MainPage.DisplayAlert(
-                    reciente ? "Confirmación crítica" : "Confirmación de reimpresión",
+                    "Confirmación de reimpresión",
                     $"La etiqueta {labelText} ya tiene actividad operativa.\n\n{detalle}\n\n¿Desea reimprimirla de todos modos?",
                     "SÍ, REIMPRIMIR", "CANCELAR");
 
@@ -977,8 +985,7 @@ public class PrinterViewModel : INotifyPropertyChanged
         // 12. Ya impresa: se registra en la tanda antes de tocar la BD
         _reprintedNewLabels.Add(labelText);
 
-        // 13. Marcar en BD (no aplica en forzado, ya está marcada)
-        if (!forzarReimpresion)
+        // 13. Marcar en BD y registrar la fecha de esta impresión (también en forzado: se imprimió una etiqueta física nueva)
         {
             try
             {
@@ -1003,7 +1010,7 @@ public class PrinterViewModel : INotifyPropertyChanged
         {
             string query = @"
             UPDATE Tb_RFID_Catalogo
-            SET EtiquetaNueva = 1
+            SET EtiquetaNueva = 1, FechaReimpresion = GETDATE()
             WHERE IdClaveTag = @EPC";
 
             using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -1038,8 +1045,8 @@ public class PrinterViewModel : INotifyPropertyChanged
     #endregion
 
     #region PROPUESTAS PARA REIMPRESIÓN DE ETIQUETAS CON HISTORIAL DE MOVIMIENTOS
-    private ObservableCollection<string> _etiquetasSugeridas;
-    public ObservableCollection<string> EtiquetasSugeridas
+    private ObservableCollection<EtiquetaPorReimprimir> _etiquetasSugeridas;
+    public ObservableCollection<EtiquetaPorReimprimir> EtiquetasSugeridas
     {
         get => _etiquetasSugeridas;
         set { _etiquetasSugeridas = value; OnPropertyChanged(); }
@@ -1047,8 +1054,9 @@ public class PrinterViewModel : INotifyPropertyChanged
 
     // Comando para cargar las etiquetas desde la BD
     // Comando para cuando se toca una etiqueta de la lista de propuestas
-    public ICommand ReprintFromListCommand => new Command<string>(async (idSeleccionado) =>
+    public ICommand ReprintFromListCommand => new Command<EtiquetaPorReimprimir>(async (seleccionada) =>
     {
+        string idSeleccionado = seleccionada?.IdClaveInt;
         if (!string.IsNullOrEmpty(idSeleccionado))
         {
             // Extraemos el número final para que ReprintLabelAsync lo procese (ej: 000001)
@@ -1071,6 +1079,22 @@ public class PrinterViewModel : INotifyPropertyChanged
     });
     public ICommand CargarSugerenciasCommand => new Command(async () => await CargarSugerenciasAsync());
 
+    private int _diasSinLectura = 90;
+    /// <summary>Días sin lectura a partir de los cuales una etiqueta se propone para reimpresión.</summary>
+    public int DiasSinLectura
+    {
+        get => _diasSinLectura;
+        set
+        {
+            int v = value < 1 ? 1 : value;
+            if (_diasSinLectura == v) return;
+            _diasSinLectura = v;
+            OnPropertyChanged();
+        }
+    }
+
+    private const int MAX_SUGERENCIAS = 500;
+
     private async Task CargarSugerenciasAsync()
     {
         try
@@ -1079,28 +1103,49 @@ public class PrinterViewModel : INotifyPropertyChanged
             {
                 await connection.OpenAsync();
 
-                // Consulta que une el catálogo con IdStatus=1 y filtra las que NO están en las tablas de detalle/inventario
-                string query = @"
-                SELECT IdClaveInt 
-                FROM Tb_RFID_Catalogo 
-                WHERE IdStatus = 1 --AND FechaCompra = 'MAR-2022'
-                AND IdClaveInt NOT IN (SELECT IdClaveInt FROM Tb_RFID_DetInv)
-                AND IdClaveInt NOT IN (SELECT IdClaveInt FROM Tb_RFID_Det)
-                AND FechaUltimoMovimiento IS NULL
-                ORDER BY FechaUltimoMovimiento ASC";
+                // Candidatas: activas, que aún NO se reimprimen con la etiqueta nueva (EtiquetaNueva = 0)
+                // y cuya última actividad (catálogo o movimientos Det/Mstr) es anterior al corte, o que nunca han tenido.
+                // Orden: primero las que nunca se han leído, luego las de lectura más antigua.
+                string query = $@"
+                SELECT TOP ({MAX_SUGERENCIAS}) X.IdClaveInt, X.UltimaActividad
+                FROM (
+                    SELECT C.IdClaveInt,
+                           (SELECT MAX(F) FROM (VALUES (C.FechaUltimoMovimiento), (U.UltMov)) AS T(F)) AS UltimaActividad
+                    FROM Tb_RFID_Catalogo C
+                    OUTER APPLY (
+                        SELECT MAX(M.FechaMov) AS UltMov
+                        FROM Tb_RFID_Det D
+                        JOIN Tb_RFID_Mstr M ON D.IdConseInv = M.IdConse
+                        WHERE D.IdClaveInt = C.IdClaveInt
+                    ) U
+                    WHERE C.IdStatus = 1
+                      AND ISNULL(C.EtiquetaNueva, 0) = 0
+                      AND C.IdClaveInt LIKE @Prefijo
+                ) X
+                WHERE X.UltimaActividad IS NULL OR X.UltimaActividad < DATEADD(DAY, -@Dias, GETDATE())
+                ORDER BY X.UltimaActividad ASC";
 
                 using SqlCommand cmd = new SqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@Dias", DiasSinLectura);
+                // GAB: claves que inician con 080; AGUILARES: claves que inician con 02
+                cmd.Parameters.AddWithValue("@Prefijo", EmpresaSeleccionada == Empresa.AGUILARES ? "02%" : "080%");
                 using SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                var listaTemp = new ObservableCollection<string>();
+                var listaTemp = new ObservableCollection<EtiquetaPorReimprimir>();
                 while (await reader.ReadAsync())
                 {
-                    listaTemp.Add(reader["IdClaveInt"].ToString());
+                    DateTime? ultima = reader["UltimaActividad"] != DBNull.Value
+                        ? Convert.ToDateTime(reader["UltimaActividad"])
+                        : null;
+                    listaTemp.Add(new EtiquetaPorReimprimir
+                    {
+                        IdClaveInt = reader["IdClaveInt"].ToString(),
+                        UltimaActividad = ultima,
+                        DiasSinMovimiento = ultima.HasValue ? Math.Max(0, (int)(DateTime.Now - ultima.Value).TotalDays) : null
+                    });
                 }
 
                 EtiquetasSugeridas = listaTemp;
-
-                // REQUERIMIENTO: Actualizar el número total visual
                 TotalPendientes = listaTemp.Count;
             }
         }
@@ -1141,6 +1186,10 @@ public class PrinterViewModel : INotifyPropertyChanged
                 OnPropertyChanged(nameof(IsAguilares));
                 if (value == Empresa.AGUILARES && LabelPrint < 100000)
                     LabelPrint = 100000;
+
+                // La lista de propuestas depende de la empresa
+                if (SelectedMode == "Reimpresion")
+                    _ = CargarSugerenciasAsync();
             }
         }
     }
